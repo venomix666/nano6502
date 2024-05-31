@@ -14,8 +14,6 @@
         <File path="src/UART/uart_tx.v" type="file.verilog" enable="1"/>
         <File path="src/addr_decoder.v" type="file.verilog" enable="1"/>
         <File path="src/bootrom.v" type="file.verilog" enable="1"/>
-        <File path="src/gowin_prom/prom_8k.v" type="file.verilog" enable="0"/>
-        <File path="src/gowin_sp/blockram_64k.v" type="file.verilog" enable="0"/>
         <File path="src/instram.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.cst" type="file.cst" enable="1"/>
