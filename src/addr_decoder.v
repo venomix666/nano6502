@@ -26,6 +26,7 @@ reg     [7:0]       data_o_reg;
 reg                 ram_cs_reg;
 reg                 uart_cs_reg;
 reg                 rom_cs_reg;
+reg                 led_cs_reg;
 reg     [7:0]       led_reg;
 reg     [7:0]       dummy_reg;
 // Register writing, synchronous
@@ -36,16 +37,28 @@ begin
         io_bank_l <= 8'd0;
         io_bank_h <= 8'd0;
         rom_sel <= 8'd0;
-        led_reg <= 8'd0;
     end
     else if(R_W_n == 1'b0)
     case(addr_i)
         16'h0000: io_bank_l <= data_i;
         16'h0001: io_bank_h <= data_i;
         16'h0002: rom_sel <= data_i;
-        16'h0003: led_reg <= data_i;
+        //16'h0003: led_reg <= data_i;
         default: dummy_reg <= data_i;
     endcase
+end
+
+// LED register writing, IO page 0x02
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0)
+    begin
+        led_reg <= 8'd0;
+    end
+    else if((led_cs_reg) && (addr_i == 16'hfe00) && (!R_W_n))
+    begin
+        led_reg <= data_i;
+    end
 end
 
 // Address decoding, combinatorial mux
@@ -73,19 +86,41 @@ always @(*) begin
     end
     else if((addr_i >= 16'hfe00) && (addr_i < 16'hff00))
     begin
-        if(io_bank_l == 8'h01)
-        begin
-            uart_cs_reg = 1'b1;
-            ram_cs_reg = 1'b0;
-            rom_cs_reg = 1'b0;
-        end
-        else
-        begin
-            uart_cs_reg = 1'b0;
-            ram_cs_reg = 1'b1;
-            rom_cs_reg = 1'b0;
-        end
-        data_o_reg = 8'd0;
+        case(io_bank_l)
+            8'h00:
+            begin
+                uart_cs_reg = 1'b0;
+                ram_cs_reg = 1'b0;
+                rom_cs_reg = 1'b1;
+                led_cs_reg = 1'b0;
+                data_o_reg = 8'd0;
+            end
+            8'h01:
+            begin
+                uart_cs_reg = 1'b1;
+                ram_cs_reg = 1'b0;
+                rom_cs_reg = 1'b0;
+                led_cs_reg = 1'b0;
+                data_o_reg = 8'd0;
+            end
+            8'h02:
+            begin
+                data_o_reg = led_reg;
+                uart_cs_reg = 1'b0;
+                ram_cs_reg = 1'b0;
+                rom_cs_reg = 1'b0;
+                led_cs_reg = 1'b1;
+            end
+            default:
+            begin
+                uart_cs_reg = 1'b0;
+                ram_cs_reg = 1'b1;
+                rom_cs_reg = 1'b0;
+                led_cs_reg = 1'b0;
+                data_o_reg = 8'd0;
+            end
+        endcase
+        
     end
     else if((addr_i >= 16'he000) && (addr_i < 16'hffff) && (rom_sel == 8'd0))
     begin
