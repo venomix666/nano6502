@@ -1,0 +1,268 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : nano6502.asm
+Current file: nano6502.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "BIOS"
+000000r 1               .include "uart.asm"
+000000r 2               UART_tx_data    =     $fe00
+000000r 2               UART_tx_done    =     $fe01
+000000r 2               UART_rx_data    =     $fe02
+000000r 2               UART_rx_avail   =     $fe03
+000000r 2               
+000000r 2               IO_bank         =     $00
+000000r 2               IO_bank_val     =     $01
+000000r 2               
+000000r 2               ;
+000000r 2               ; input chr from UART (waiting)
+000000r 2               ;
+000000r 2               UART_Input:
+000000r 2                   ; Set IO bank
+000000r 2  A9 01            lda #IO_bank_val
+000002r 2  85 00            sta IO_bank
+000004r 2                   ; Check if data is available
+000004r 2               UART_Input_wait:
+000004r 2  AD 03 FE         lda UART_rx_avail
+000007r 2  F0 FB            beq UART_Input_wait
+000009r 2               UART_Input_done:
+000009r 2  AD 02 FE         lda UART_rx_data
+00000Cr 2  60               rts
+00000Dr 2               ;
+00000Dr 2               ; non-waiting get character routine
+00000Dr 2               ;
+00000Dr 2               UART_Scan:
+00000Dr 2               	; Set IO bank
+00000Dr 2  A9 01            lda #IO_bank_val
+00000Fr 2  85 00            sta IO_bank
+000011r 2  18               clc
+000012r 2  AD 03 FE         lda UART_rx_avail
+000015r 2  F0 04        	beq UART_Scan_Done
+000017r 2  AD 02 FE         lda UART_rx_data
+00001Ar 2  38               sec
+00001Br 2               UART_Scan_Done:
+00001Br 2  60               rts
+00001Cr 2               ;
+00001Cr 2               ; output to OutPut Port
+00001Cr 2               ;
+00001Cr 2               UART_Output:
+00001Cr 2                   ; Save data
+00001Cr 2  48               pha
+00001Dr 2                   ; Set IO bank
+00001Dr 2  A9 01            lda #IO_bank_val
+00001Fr 2  85 00            sta IO_bank
+000021r 2               UART_Output_Wait:
+000021r 2  AD 01 FE         lda UART_tx_done
+000024r 2  F0 FB            beq UART_Output_Wait
+000026r 2  68               pla
+000027r 2  8D 00 FE         sta UART_tx_data
+00002Ar 2  60               rts
+00002Br 2               
+00002Br 2               ;end of file
+00002Br 2               
+00002Br 1               .include "wozmon.asm"
+00002Br 2               .segment "WOZMON"
+000000r 2               
+000000r 2               IN          = $0200          ;*Input buffer
+000000r 2               XAML        = $24            ;*Index pointers
+000000r 2               XAMH        = $25
+000000r 2               STL         = $26
+000000r 2               STH         = $27
+000000r 2               L           = $28
+000000r 2               H           = $29
+000000r 2               YSAV        = $2A
+000000r 2               MODE        = $2B
+000000r 2               MSGL        = $2C
+000000r 2               MSGH        = $2D
+000000r 2               COUNTER     = $2E
+000000r 2               CRC         = $2F
+000000r 2               CRCCHECK    = $30
+000000r 2               
+000000r 2  D8           RESET:      CLD             ;Clear decimal arithmetic mode.
+000001r 2  58                       CLI
+000002r 2               MONSTART:
+000002r 2  A9 11                    lda #$11
+000004r 2  85 03                    sta $03
+000006r 2  A9 0D                    LDA #$0D
+000008r 2  20 rr rr                 jsr ECHO
+00000Br 2  A9 0A                    LDA #$0A
+00000Dr 2  20 rr rr                 jsr ECHO
+000010r 2  A9 rr                    LDA #<MSG1
+000012r 2  85 2C                    STA MSGL
+000014r 2  A9 rr                    LDA #>MSG1
+000016r 2  85 2D                    STA MSGH
+000018r 2  20 rr rr                 JSR SHWMSG      ;* Show Welcome.
+00001Br 2  A9 0D                    LDA #$0D
+00001Dr 2  20 rr rr                 jsr ECHO        ;* New line.
+000020r 2  A9 0A                    LDA #$0A
+000022r 2  20 rr rr                 jsr ECHO
+000025r 2  A9 9B        SOFTRESET:  LDA #$9B        ;* Auto escape.
+000027r 2  C9 88        NOTCR:      CMP #$88        ;"<-"? * Note this was chaged to $88 which is the back space key.
+000029r 2  F0 18                    BEQ BACKSPACE   ;Yes.
+00002Br 2  C9 9B                    CMP #$9B        ;ESC?
+00002Dr 2  F0 03                    BEQ ESCAPE      ;Yes.
+00002Fr 2  C8                       INY             ;Advance text index.
+000030r 2  10 1E                    BPL NEXTCHAR    ;Auto ESC if >127.
+000032r 2  A9 DC        ESCAPE:     LDA #$DC        ;"\"
+000034r 2  20 rr rr                 JSR ECHO        ;Output it.
+000037r 2  A9 8D        GETLINE:    LDA #$8D        ;CR.
+000039r 2  20 rr rr                 JSR ECHO        ;Output it.
+00003Cr 2  A9 0A                    LDA #$0A
+00003Er 2  20 rr rr                 JSR ECHO
+000041r 2  A0 01                    LDY #$01        ;Initiallize text index.
+000043r 2  88           BACKSPACE:  DEY             ;Backup text index.
+000044r 2  30 F1                    BMI GETLINE     ;Beyond start of line, reinitialize.
+000046r 2  A9 A0                    LDA #$A0        ;*Space, overwrite the backspaced char.
+000048r 2  20 rr rr                 JSR ECHO
+00004Br 2  A9 88                    LDA #$88        ;*Backspace again to get to correct pos.
+00004Dr 2  20 rr rr                 JSR ECHO
+000050r 2  20 rr rr     NEXTCHAR:   jsr UART_Input
+000053r 2                           ;LDA ACIA_SR     ;*See if we got an incoming char
+000053r 2                           ;AND #$08        ;*Test bit 3
+000053r 2                           ;BEQ NEXTCHAR    ;*Wait for character
+000053r 2                           ;LDA ACIA_DAT    ;*Load char
+000053r 2  C9 60                    CMP #$60        ;*Is it Lower case
+000055r 2  30 02                    BMI CONVERT     ;*Nope, just convert it
+000057r 2  29 5F                    AND #$5F        ;*If lower case, convert to Upper case
+000059r 2  09 80        CONVERT:    ORA #$80        ;*Convert it to "ASCII Keyboard" Input
+00005Br 2  99 00 02                 STA IN,Y        ;Add to text buffer.
+00005Er 2  20 rr rr                 JSR ECHO        ;Display character.
+000061r 2  C9 8D                    CMP #$8D        ;CR?
+000063r 2  D0 C2                    BNE NOTCR       ;No.
+000065r 2  A0 FF                    LDY #$FF        ;Reset text index.
+000067r 2  A9 00                    LDA #$00        ;For XAM mode.
+000069r 2  AA                       TAX             ;0->X.
+00006Ar 2  0A           SETSTOR:    ASL             ;Leaves $7B if setting STOR mode.
+00006Br 2  85 2B        SETMODE:    STA MODE        ;$00 = XAM, $7B = STOR, $AE = BLOK XAM.
+00006Dr 2  C8           BLSKIP:     INY             ;Advance text index.
+00006Er 2  B9 00 02     NEXTITEM:   LDA IN,Y        ;Get character.
+000071r 2  C9 8D                    CMP #$8D        ;CR?
+000073r 2  F0 C2                    BEQ GETLINE     ;Yes, done this line.
+000075r 2  C9 AE                    CMP #$AE        ;"."?
+000077r 2  90 F4                    BCC BLSKIP      ;Skip delimiter.
+000079r 2  F0 F0                    BEQ SETMODE     ;Set BLOCK XAM mode.
+00007Br 2  C9 BA                    CMP #$BA        ;":"?
+00007Dr 2  F0 EB                    BEQ SETSTOR     ;Yes, set STOR mode.
+00007Fr 2  C9 D2                    CMP #$D2        ;"R"?
+000081r 2  F0 2D                    BEQ RUN         ;Yes, run user program.
+000083r 2                           ;CMP #$CC        ;* "L"?
+000083r 2                           ;BEQ LOADINT     ;* Yes, Load Intel Code.
+000083r 2  86 28                    STX L           ;$00->L.
+000085r 2  86 29                    STX H           ; and H.
+000087r 2  84 2A                    STY YSAV        ;Save Y for comparison.
+000089r 2  B9 00 02     NEXTHEX:    LDA IN,Y        ;Get character for hex test.
+00008Cr 2  49 B0                    EOR #$B0        ;Map digits to $0-9.
+00008Er 2  C9 0A                    CMP #$0A        ;Digit?
+000090r 2  90 06                    BCC DIG         ;Yes.
+000092r 2  69 88                    ADC #$88        ;Map letter "A"-"F" to $FA-FF.
+000094r 2  C9 FA                    CMP #$FA        ;Hex letter?
+000096r 2  90 11                    BCC NOTHEX      ;No, character not hex.
+000098r 2  0A           DIG:        ASL
+000099r 2  0A                       ASL             ;Hex digit to MSD of A.
+00009Ar 2  0A                       ASL
+00009Br 2  0A                       ASL
+00009Cr 2  A2 04                    LDX #$04        ;Shift count.
+00009Er 2  0A           HEXSHIFT:   ASL             ;Hex digit left MSB to carry.
+00009Fr 2  26 28                    ROL L           ;Rotate into LSD.
+0000A1r 2  26 29                    ROL H           ;Rotate into MSD's.
+0000A3r 2  CA                       DEX             ;Done 4 shifts?
+0000A4r 2  D0 F8                    BNE HEXSHIFT    ;No, loop.
+0000A6r 2  C8                       INY             ;Advance text index.
+0000A7r 2  D0 E0                    BNE NEXTHEX     ;Always taken. Check next character for hex.
+0000A9r 2  C4 2A        NOTHEX:     CPY YSAV        ;Check if L, H empty (no hex digits).
+0000ABr 2  D0 0C                    BNE NOESCAPE    ;* Branch out of range, had to improvise...
+0000ADr 2  4C rr rr                 JMP ESCAPE      ;Yes, generate ESC sequence.
+0000B0r 2               
+0000B0r 2  20 rr rr     RUN:        JSR ACTRUN      ;* JSR to the Address we want to run.
+0000B3r 2  4C rr rr                 JMP SOFTRESET   ;* When returned for the program, reset EWOZ.
+0000B6r 2  6C 24 00     ACTRUN:     JMP (XAML)      ;Run at current XAM index.
+0000B9r 2               
+0000B9r 2               ;LOADINT:    JSR LOADINTEL   ;* Load the Intel code.
+0000B9r 2               ;            JMP SOFTRESET   ;* When returned from the program, reset EWOZ.
+0000B9r 2               
+0000B9r 2  24 2B        NOESCAPE:   BIT MODE        ;Test MODE byte.
+0000BBr 2  50 0D                    BVC NOTSTOR     ;B6=0 for STOR, 1 for XAM and BLOCK XAM
+0000BDr 2  A5 28                    LDA L           ;LSD's of hex data.
+0000BFr 2  81 26                    STA (STL, X)    ;Store at current "store index".
+0000C1r 2  E6 26                    INC STL         ;Increment store index.
+0000C3r 2  D0 A9                    BNE NEXTITEM    ;Get next item. (no carry).
+0000C5r 2  E6 27                    INC STH         ;Add carry to 'store index' high order.
+0000C7r 2  4C rr rr     TONEXTITEM: JMP NEXTITEM    ;Get next command item.
+0000CAr 2  30 30        NOTSTOR:    BMI XAMNEXT     ;B7=0 for XAM, 1 for BLOCK XAM.
+0000CCr 2  A2 02                    LDX #$02        ;Byte count.
+0000CEr 2  B5 27        SETADR:     LDA L-1,X       ;Copy hex data to
+0000D0r 2  95 25                    STA STL-1,X     ;"store index".
+0000D2r 2  95 23                    STA XAML-1,X    ;And to "XAM index'.
+0000D4r 2  CA                       DEX             ;Next of 2 bytes.
+0000D5r 2  D0 F7                    BNE SETADR      ;Loop unless X = 0.
+0000D7r 2  D0 19        NXTPRNT:    BNE PRDATA      ;NE means no address to print.
+0000D9r 2  A9 8D                    LDA #$8D        ;CR.
+0000DBr 2  20 rr rr                 JSR ECHO        ;Output it.
+0000DEr 2  A9 0A                    LDA #$0A
+0000E0r 2  20 rr rr                 JSR ECHO
+0000E3r 2  A5 25                    LDA XAMH        ;'Examine index' high-order byte.
+0000E5r 2  20 rr rr                 JSR PRBYTE      ;Output it in hex format.
+0000E8r 2  A5 24                    LDA XAML        ;Low-order "examine index" byte.
+0000EAr 2  20 rr rr                 JSR PRBYTE      ;Output it in hex format.
+0000EDr 2  A9 BA                    LDA #$BA        ;":".
+0000EFr 2  20 rr rr                 JSR ECHO        ;Output it.
+0000F2r 2  A9 A0        PRDATA:     LDA #$A0        ;Blank.
+0000F4r 2  20 rr rr                 JSR ECHO        ;Output it.
+0000F7r 2  A1 24                    LDA (XAML,X)    ;Get data byte at 'examine index".
+0000F9r 2  20 rr rr                 JSR PRBYTE      ;Output it in hex format.
+0000FCr 2  86 2B        XAMNEXT:    STX MODE        ;0-> MODE (XAM mode).
+0000FEr 2  A5 24                    LDA XAML
+000100r 2  C5 28                    CMP L           ;Compare 'examine index" to hex data.
+000102r 2  A5 25                    LDA XAMH
+000104r 2  E5 29                    SBC H
+000106r 2  B0 BF                    BCS TONEXTITEM  ;Not less, so no more data to output.
+000108r 2  E6 24                    INC XAML
+00010Ar 2  D0 02                    BNE MOD8CHK     ;Increment 'examine index".
+00010Cr 2  E6 25                    INC XAMH
+00010Er 2  A5 24        MOD8CHK:    LDA XAML        ;Check low-order 'exainine index' byte
+000110r 2  29 0F                    AND #$0F        ;For MOD 8=0 ** changed to $0F to get 16 values per row **
+000112r 2  10 C3                    BPL NXTPRNT     ;Always taken.
+000114r 2  48           PRBYTE:     PHA             ;Save A for LSD.
+000115r 2  4A                       LSR
+000116r 2  4A                       LSR
+000117r 2  4A                       LSR             ;MSD to LSD position.
+000118r 2  4A                       LSR
+000119r 2  20 rr rr                 JSR PRHEX       ;Output hex digit.
+00011Cr 2  68                       PLA             ;Restore A.
+00011Dr 2  29 0F        PRHEX:      AND #$0F        ;Mask LSD for hex print.
+00011Fr 2  09 B0                    ORA #$B0        ;Add "0".
+000121r 2  C9 BA                    CMP #$BA        ;Digit?
+000123r 2  90 02                    BCC ECHO        ;Yes, output it.
+000125r 2  69 06                    ADC #$06        ;Add offset for letter.
+000127r 2  48           ECHO:       PHA             ;*Save A
+000128r 2  29 7F                    AND #$7F        ;*Change to "standard ASCII"
+00012Ar 2  20 rr rr                 jsr UART_Output
+00012Dr 2  68                       PLA             ;*Restore A
+00012Er 2  60                       RTS             ;*Done, over and out...
+00012Fr 2               
+00012Fr 2  A0 00        SHWMSG:     LDY #$0
+000131r 2  B1 2C        SHPRINT:    LDA (MSGL),Y
+000133r 2  F0 06                    BEQ SHDONE
+000135r 2  20 rr rr                 JSR ECHO
+000138r 2  C8                       INY
+000139r 2  D0 F6                    BNE SHPRINT
+00013Br 2  60           SHDONE:     RTS
+00013Cr 2               
+00013Cr 2               
+00013Cr 2  57 4F 5A 4D  MSG1:        .byte "WOZMON for DAIM-X v0.1",0
+000140r 2  4F 4E 20 66  
+000144r 2  6F 72 20 44  
+000153r 2               
+000153r 2               NMI:
+000153r 2  40                       RTI
+000154r 2               
+000154r 2               IRQ:
+000154r 2  68                       pla
+000155r 2  40                       RTI
+000156r 2               
+000156r 2                  ;.org $FFFA
+000156r 2               .segment "VECTORS"
+000000r 2  rr rr           .word NMI
+000002r 2  rr rr           .word RESET
+000004r 2  rr rr           .word IRQ
+000006r 2               
+000006r 1               
