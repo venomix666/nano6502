@@ -15,6 +15,7 @@
         <File path="src/addr_decoder.v" type="file.verilog" enable="1"/>
         <File path="src/bootrom.v" type="file.verilog" enable="1"/>
         <File path="src/instram.v" type="file.verilog" enable="1"/>
+        <File path="src/leds.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.cst" type="file.cst" enable="1"/>
         <File path="src/nano6502_top.sdc" type="file.sdc" enable="1"/>

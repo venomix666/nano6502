@@ -16,7 +16,8 @@ module addr_decoder(
     output              uart_cs,
     // ROM
     output              rom_cs,
-    output [7:0]        leds
+    output              addr_dec_cs,
+    output              led_cs
 );
 
 reg     [7:0]       io_bank_l;
@@ -27,7 +28,7 @@ reg                 ram_cs_reg;
 reg                 uart_cs_reg;
 reg                 rom_cs_reg;
 reg                 led_cs_reg;
-reg     [7:0]       led_reg;
+reg                 addr_dec_cs_reg;
 reg     [7:0]       dummy_reg;
 // Register writing, synchronous
 always@(posedge clk_i or negedge rst_n_i)
@@ -48,19 +49,6 @@ begin
     endcase
 end
 
-// LED register writing, IO page 0x02
-always @(posedge clk_i or negedge rst_n_i)
-begin
-    if(rst_n_i == 1'b0)
-    begin
-        led_reg <= 8'd0;
-    end
-    else if((led_cs_reg) && (addr_i == 16'hfe00) && (!R_W_n))
-    begin
-        led_reg <= data_i;
-    end
-end
-
 // Address decoding, combinatorial mux
 always @(*) begin
     if(addr_i == 16'h0000) 
@@ -69,6 +57,8 @@ always @(*) begin
         ram_cs_reg = 1'b0;
         uart_cs_reg = 1'b0;
         rom_cs_reg = 1'b0;
+        led_cs_reg = 1'b0;
+        addr_dec_cs_reg = 1'b1;
     end
     else if(addr_i == 16'h0001) 
     begin    
@@ -76,6 +66,8 @@ always @(*) begin
         ram_cs_reg = 1'b0;
         uart_cs_reg = 1'b0;
         rom_cs_reg = 1'b0;
+        led_cs_reg = 1'b0;
+        addr_dec_cs_reg = 1'b1;
     end
     else if(addr_i == 16'h0002)
     begin
@@ -83,6 +75,8 @@ always @(*) begin
         ram_cs_reg = 1'b0;
         uart_cs_reg = 1'b0;
         rom_cs_reg = 1'b0;
+        led_cs_reg = 1'b0;
+        addr_dec_cs_reg = 1'b1;
     end
     else if((addr_i >= 16'hfe00) && (addr_i < 16'hff00))
     begin
@@ -94,6 +88,7 @@ always @(*) begin
                 rom_cs_reg = 1'b1;
                 led_cs_reg = 1'b0;
                 data_o_reg = 8'd0;
+                addr_dec_cs_reg = 1'b0;
             end
             8'h01:
             begin
@@ -102,14 +97,16 @@ always @(*) begin
                 rom_cs_reg = 1'b0;
                 led_cs_reg = 1'b0;
                 data_o_reg = 8'd0;
+                addr_dec_cs_reg = 1'b0;
             end
             8'h02:
             begin
-                data_o_reg = led_reg;
+                data_o_reg = 8'd0;
                 uart_cs_reg = 1'b0;
                 ram_cs_reg = 1'b0;
                 rom_cs_reg = 1'b0;
                 led_cs_reg = 1'b1;
+                addr_dec_cs_reg = 1'b0;
             end
             default:
             begin
@@ -118,6 +115,7 @@ always @(*) begin
                 rom_cs_reg = 1'b0;
                 led_cs_reg = 1'b0;
                 data_o_reg = 8'd0;
+                addr_dec_cs_reg = 1'b0;
             end
         endcase
         
@@ -128,6 +126,8 @@ always @(*) begin
         ram_cs_reg = 1'b0;
         rom_cs_reg = 1'b1;
         data_o_reg = 8'd0;
+        led_cs_reg = 1'b0;
+        addr_dec_cs_reg = 1'b1;
     end
     else
     begin
@@ -135,6 +135,8 @@ always @(*) begin
         ram_cs_reg = 1'b1;
         rom_cs_reg = 1'b0;
         uart_cs_reg = 1'b0;
+        led_cs_reg = 1'b0;
+        addr_dec_cs_reg = 1'b0;
     end
 end
 
@@ -142,7 +144,9 @@ assign data_o = data_o_reg;
 assign ram_cs = ram_cs_reg;
 assign uart_cs = uart_cs_reg;
 assign rom_cs = rom_cs_reg;
-assign leds = led_reg;
+assign addr_dec_cs = addr_dec_cs_reg;
+assign led_cs = led_cs_reg;
+
 
 // Write enable generation
 assign ram_we = ram_cs && ~R_W_n;

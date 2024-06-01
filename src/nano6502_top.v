@@ -46,7 +46,8 @@ module nano6502_top
     input           rst_i, //S1
     input           uart_rx_i,
     output          uart_tx_o,
-    output          leds[5:0]
+    output          leds[5:0],
+    output          ws2812_o
 );
 
 reg     [7:0]   cpu_data_i;
@@ -69,6 +70,11 @@ wire            uart_cs;
 
 wire            rom_cs;
 wire    [7:0]   rom_data_o;
+
+wire            addr_dec_cs;
+
+wire            led_cs;
+wire    [7:0]   led_data_o;
 wire    [7:0]   ledwire;
 
 assign rst_n = ~rst_i;
@@ -80,18 +86,6 @@ assign leds[3] = ~ledwire[3];
 assign leds[2] = ~ledwire[2];
 assign leds[1] = ~ledwire[1]; 
 assign leds[0] = ~ledwire[0];
-
-// 64k x 8, main ram
-/*blockram_64k main_ram(
-        .dout(ram_data_o), //output [7:0] dout
-        .clk(clk_i), //input clk
-        .oce(ram_cs), //input oce
-        .ce(ram_cs), //input ce
-        .reset(rst_p), //input reset
-        .wre(ram_we), //input wre
-        .ad(cpu_addr), //input [15:0] ad
-        .din(cpu_data_o) //input [7:0] din
-);*/
 
 instram main_ram(
     .clk(clk_i),
@@ -112,7 +106,8 @@ addr_decoder addr_dec(
         .ram_we(ram_we),
         .uart_cs(uart_cs),
         .rom_cs(rom_cs),
-        .leds(ledwire)
+        .addr_dec_cs(addr_dec_cs),
+        .led_cs(led_cs)
 );
 
 T65 CPU(
@@ -155,27 +150,30 @@ uart uart_inst(
         .uart_tx(uart_tx_o)
 );
 
-/*prom_8k bootrom(
-        .dout(rom_data_o), //output [7:0] dout
-        .clk(clk_i), //input clk
-        .oce(rom_cs), //input oce
-        .ce(rom_cs), //input ce
-        .reset(rst_p), //input reset
-        .ad(cpu_addr[12:0]) //input [12:0] ad
-    );
-*/
-
-// CPU data mux
 bootrom bootrom_inst(
     .clk(clk_i),
     .adr(cpu_addr[12:0]),
     .data(rom_data_o)
 );
+
+leds led_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr[1:0]),
+    .data_i(cpu_data_o),
+    .led_cs(led_cs),
+    .data_o(led_data_o),
+    .leds(ledwire),
+    .ws2812(ws2812_o)
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i <= rom_data_o;
     else if(ram_cs == 1'b1) cpu_data_i <= ram_data_o;
     else if(uart_cs == 1'b1) cpu_data_i <= uart_data_o;
-    else if(cpu_addr[15:1] == 15'd0) cpu_data_i <= addr_dec_data_o;
+    else if(addr_dec_cs == 1'b1) cpu_data_i <= addr_dec_data_o;
+    else if(led_cs == 1'b1) cpu_data_i <= led_data_o;
     else cpu_data_i <= cpu_data_o;
 end
 
