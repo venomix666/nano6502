@@ -37,7 +37,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe04:  SD card busy  
 0xfe05:  SD card read strobe (write any value to initiate a sector read)  
 0xfe06:  SD card write strobe (write any value to initiate a sector write)  
-0xfe07:  Sector data page (0-3), selected which 128 bytes of the sector are availabe on 0xfe80-0xfeff  
+0xfe07:  Sector data page register (0-3), selects which 128 bytes of the sector are availabe on 0xfe80-0xfeff  
 0xfe08:  SD card status (debug only)  
 0xfe09:  SD card type (debug only)  
 0xfe0a:  SD operation done (debug only)  
