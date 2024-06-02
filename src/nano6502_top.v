@@ -39,6 +39,7 @@
 // 0x0000 ROM
 // 0x0001 UART
 // 0x0002 LEDs
+// 0x0003 SD card
 
 module nano6502_top
 (
@@ -47,7 +48,10 @@ module nano6502_top
     input           uart_rx_i,
     output          uart_tx_o,
     output          leds[5:0],
-    output          ws2812_o
+    output          ws2812_o,
+    output          sdclk,
+    inout           sdcmd,
+    inout [3:0]     sddat
 );
 
 reg     [7:0]   cpu_data_i;
@@ -76,6 +80,9 @@ wire            addr_dec_cs;
 wire            led_cs;
 wire    [7:0]   led_data_o;
 wire    [7:0]   ledwire;
+
+wire            sd_cs;
+wire    [7:0]   sd_data_o;
 
 assign rst_n = ~rst_i;
 assign rst_p = rst_i;
@@ -107,7 +114,8 @@ addr_decoder addr_dec(
         .uart_cs(uart_cs),
         .rom_cs(rom_cs),
         .addr_dec_cs(addr_dec_cs),
-        .led_cs(led_cs)
+        .led_cs(led_cs),
+        .sd_cs(sd_cs)
 );
 
 T65 CPU(
@@ -168,8 +176,22 @@ leds led_inst(
     .ws2812(ws2812_o)
 );
 
+sd_interface sd_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr[7:0]),
+    .data_i(cpu_data_o),
+    .sd_cs(sd_cs),
+    .data_o(sd_data_o),
+    .sdclk(sdclk),
+    .sdcmd(sdcmd),
+    .sddat(sddat)
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i <= rom_data_o;
+    else if(sd_cs == 1'b1) cpu_data_i <= sd_data_o;
     else if(ram_cs == 1'b1) cpu_data_i <= ram_data_o;
     else if(uart_cs == 1'b1) cpu_data_i <= uart_data_o;
     else if(addr_dec_cs == 1'b1) cpu_data_i <= addr_dec_data_o;
