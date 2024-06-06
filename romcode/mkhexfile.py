@@ -24,12 +24,6 @@ else:
         infile = open(inputfile, "rb")
         outfile = open(outputfile,"w")
 
-        # Write header
-        outfile.write("#File_format=Hex\n")
-        outfile.write("#Address_depth=8192\n")
-        outfile.write("#Data_width=8\n")
-
-
         # Write start address in little endian
         #addr_bytes = addr.to_bytes(2, "little")
         #outfile.write(addr_bytes)

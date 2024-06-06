@@ -1,4 +1,6 @@
 .setcpu "65C02"
+.include "jumptable.asm"
 .segment "BIOS"
 .include "uart.asm"
+.include "sdload.asm"
 .include "wozmon.asm"

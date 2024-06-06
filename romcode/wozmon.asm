@@ -186,7 +186,7 @@ SHPRINT:    LDA (MSGL),Y
 SHDONE:     RTS 
 
 
-MSG1:        .byte "WOZMON for DAIM-X v0.1",0
+MSG1:        .byte "WOZMON for nano6502",0
 
 NMI:
             RTI
