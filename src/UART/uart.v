@@ -10,7 +10,7 @@ module uart(
 	output                       uart_tx
 );
 
-parameter                        CLK_FRE  = 27;//Mhz
+parameter                        CLK_FRE  = 25.175;//Mhz
 parameter                        UART_FRE = 115200;//Mhz
 
 reg[7:0]                         tx_data;

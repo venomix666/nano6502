@@ -14,6 +14,7 @@
         <File path="src/UART/uart_tx.v" type="file.verilog" enable="1"/>
         <File path="src/addr_decoder.v" type="file.verilog" enable="1"/>
         <File path="src/bootrom.v" type="file.verilog" enable="1"/>
+        <File path="src/dvi_tx/dvi_tx.v" type="file.verilog" enable="1"/>
         <File path="src/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
         <File path="src/instram.v" type="file.verilog" enable="1"/>
         <File path="src/leds.v" type="file.verilog" enable="1"/>
@@ -21,6 +22,7 @@
         <File path="src/sdcard/sd_interface.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sd_rw.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sdcmd_ctrl.v" type="file.verilog" enable="1"/>
+        <File path="src/video/video.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.cst" type="file.cst" enable="1"/>
         <File path="src/nano6502_top.sdc" type="file.sdc" enable="1"/>
     </FileList>

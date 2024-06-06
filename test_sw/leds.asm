@@ -9,6 +9,8 @@ RED =$FE01
 BLUE = $FE02
 GREEN = $FE03
 
+test_addr = $E100 ; This is only writable if the ROM is switched out
+
 IO_bank_sel = $00
 IO_bank_led = $02
 
@@ -27,12 +29,15 @@ ROM_sel = $02
     sta MSGH
     jsr STROUT
 
-    lda #$11
+    lda #'*'
+    sta test_addr
+
+    lda #$00
     sta LEDS
     lda #$00
     sta RED
 
-    lda #$01
+    lda #$ff
     sta BLUE
 
     lda #$88
@@ -42,29 +47,23 @@ ROM_sel = $02
     sta IO_bank_sel
 
 ledloop:
-    lda RED
-    clc
-    adc #$08
-    sta RED
-
+    inc RED
     jsr delay
 
-    lda BLUE
-    rol
-    sta BLUE
 
+    dec BLUE
     jsr delay
 
-    lda GREEN
-    ror
-    ror
-    sta GREEN
+    inc GREEN
+    inc GREEN
     
-    lda LEDS
-    rol
-    sta LEDS
-    
+    inc LEDS
+ 
     jsr delay
+    
+    lda test_addr
+    jsr UART_Output
+
     jmp ledloop
 
 STROUT:

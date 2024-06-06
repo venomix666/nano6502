@@ -50,6 +50,10 @@ module nano6502_top
     output          leds[5:0],
     output          ws2812_o,
     output          sdclk,
+    output            tmds_clk_p    ,
+    output            tmds_clk_n    ,
+    output     [2:0]  tmds_data_p   ,//{r,g,b}
+    output     [2:0]  tmds_data_n   ,
     inout           sdcmd,
     inout [3:0]     sddat
 );
@@ -187,6 +191,15 @@ sd_interface sd_inst(
     .sdclk(sdclk),
     .sdcmd(sdcmd),
     .sddat(sddat)
+);
+
+video video_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .tmds_clk_p_o(tmds_clk_p),
+    .tmds_clk_n_o(tmds_clk_n),
+    .tmds_data_p_o(tmds_data_p),
+    .tmds_data_n_o(tmds_data_n)
 );
 
 always @(*) begin
