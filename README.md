@@ -9,6 +9,13 @@ Planned features for the first version are:
 * 80-column text mode HDMI video output (not implemented yet)
 * USB keyboard support (not implemented yet)
 
+## Set up PLL
+In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
+* Open a serial terminal connection to the board
+* Press Ctrl+x, Ctrl+c, enter
+* Enter the command: pll_clk O0=25175K -s
+* Enter the command: reboot
+
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
