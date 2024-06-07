@@ -1,11 +1,11 @@
 # nano6502
-6502 computer for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).
+6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).
 
 Planned features for the first version are:  
 * 64 k RAM (currently implemented with block RAM)
 * 8k ROM which can be switched out (also block RAM)
 * UART (implemented)
-* SD card storage (implemented in HW, no SW yet)
+* SD card storage (implemented)
 * 80-column text mode HDMI video output (not implemented yet)
 * USB keyboard support (not implemented yet)
 
