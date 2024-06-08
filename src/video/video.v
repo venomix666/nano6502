@@ -47,7 +47,7 @@ module video(
 
 // Parameters for 640x480 60Hz with 25.175 MHz clock
 localparam      I_h_total       = 12'd800;
-localparam      I_h_sync        = 12'd16;
+localparam      I_h_sync        = 12'd96;
 localparam      I_h_bporch      = 12'd48;
 localparam      I_h_res         = 12'd640;
 localparam      I_v_total       = 12'd525;
@@ -56,6 +56,7 @@ localparam      I_v_bporch      = 12'd33;
 localparam      I_v_res         = 12'd480;
 localparam      I_hs_pol        = 1'd0;
 localparam      I_vs_pol        = 1'd0;
+//localparam      char            = 7'h30;
 
 localparam N = 5; //delay N clocks
 
@@ -151,15 +152,48 @@ begin
 		end
 end
 
+// Character addressing
+wire    [11:0]  char_x_offset;
+wire    [11:0]  char_y_offset;
+wire    [6:0]   char_x;
+wire    [4:0]   char_y;
+wire    [7:0]   char;
+
+assign char_x_offset = H_cnt-12'd149;      
+assign char_x = char_x_offset[9:3];
+assign char_y_offset = V_cnt-12'd35;
+assign char_y = char_y_offset[8:4];
+assign char = char_y+char_x;
+
+// Font drawing
+wire    [2:0]   font_x;
+wire    [11:0]  y_offset;
+wire    [3:0]   font_y;
+wire    [10:0]  font_addr;
+wire    [7:0]   font_data;
+wire            font_out;
+
+assign font_x = H_cnt[2:0]-5;
+assign y_offset = V_cnt - 12'd35;
+assign font_y = y_offset[3:0]; 
+assign font_addr = {char, font_y};
+assign font_out = font_data[7'd7-font_x];
+
+fontrom fontrom_inst(
+    .clk(clk_i),
+    .adr(font_addr),
+    .data(font_data)
+);
+
 DVI_TX_Top dvi_tx(
 		.I_rst_n(rst_n_i), //input I_rst_n
 		.I_rgb_clk(clk_i), //input I_rgb_clk
 		.I_rgb_vs(dvi_vs), //input I_rgb_vs
 		.I_rgb_hs(dvi_hs), //input I_rgb_hs
 		.I_rgb_de(dvi_de), //input I_rgb_de
-		.I_rgb_r(8'd0), //input [7:0] I_rgb_r
-		.I_rgb_g(8'd0), //input [7:0] I_rgb_g
-		.I_rgb_b(8'd128), //input [7:0] I_rgb_b
+		.I_rgb_r({font_out, 7'd0}), //input [7:0] I_rgb_r
+		.I_rgb_g({font_out, 7'd0}), //input [7:0] I_rgb_g
+		.I_rgb_b({font_out, 7'd0}), //input [7:0] I_rgb_b
 		.O_tmds_clk_p(tmds_clk_p_o), //output O_tmds_clk_p
 		.O_tmds_clk_n(tmds_clk_n_o), //output O_tmds_clk_n
 		.O_tmds_data_p(tmds_data_p_o), //output [2:0] O_tmds_data_p

@@ -22,6 +22,7 @@
         <File path="src/sdcard/sd_interface.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sd_rw.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sdcmd_ctrl.v" type="file.verilog" enable="1"/>
+        <File path="src/video/fontrom.v" type="file.verilog" enable="1"/>
         <File path="src/video/video.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.cst" type="file.cst" enable="1"/>
         <File path="src/nano6502_top.sdc" type="file.sdc" enable="1"/>
