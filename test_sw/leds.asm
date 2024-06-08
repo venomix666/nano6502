@@ -13,7 +13,7 @@ test_addr = $E100 ; This is only writable if the ROM is switched out
 
 IO_bank_sel = $00
 IO_bank_led = $02
-
+IO_bank_video = $04
 ROM_sel = $02
 
     lda #<MSG1
@@ -28,6 +28,22 @@ ROM_sel = $02
     lda #>MSG2
     sta MSGH
     jsr STROUT
+
+
+    lda #IO_bank_video
+    sta IO_bank_sel
+    lda #04
+    sta $fe00
+    
+    ldx #0
+cout_loop:
+    lda MSG3,X
+    beq cout_done
+    sta $fe80,X
+    inx
+    jmp cout_loop    
+
+cout_done:
 
     lda #'*'
     sta test_addr
@@ -95,4 +111,7 @@ MSG1:
 
 MSG2:
     .byte "ROM switched out",13,10,0
+
+MSG3:
+    .byte "Hello world, from the nano6502!",0
 .include "uart.asm"

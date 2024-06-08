@@ -3,7 +3,10 @@
 // Sync generation is based on the example from Gowin Semi.
 //
 // Registers:
-// 00       - Line (selects which line is avaible at FE80-FECF
+// 00       - Line (selects which line is avaible at FE80-FECF)
+// 01       - Cursor X
+// 02       - Cursor Y
+// 03       - Cursor visible
 // 80-CF    - Line data
 
 // 640x480 info:
@@ -151,10 +154,19 @@ end
 // CPU interface
 reg     [7:0]   data_o_reg;
 reg     [4:0]   line;
+reg     [6:0]   cursor_x;
+reg     [4:0]   cursor_y;
+reg             cursor_visible;
+reg     [23:0]  cursor_cnt;
+
+wire            cursor_active;
 
 always @(*)
 begin
     if(reg_addr_i == 8'h00) data_o_reg <= {3'd0, line};
+    else if(reg_addr_i == 8'h01) data_o_reg <= {1'd0, cursor_x};
+    else if(reg_addr_i == 8'h02) data_o_reg <= {3'd0, cursor_y};
+    else if(reg_addr_i == 8'h03) data_o_reg <= {7'd0, cursor_visible};
     else if(reg_addr_i[7] && (reg_addr_i[6:0] < 80)) data_o_reg <= charbuf_data_o;
     else data_o_reg <= 8'd0;
 end
@@ -164,14 +176,35 @@ begin
     if(rst_n_i == 1'b0)
     begin
         line <= 5'd0;
+        cursor_x <= 7'd0;
+        cursor_y <= 4'd0;
+        cursor_visible <= 1'd1;
     end
     else if(!R_W_n && video_cs)
     begin
         if(reg_addr_i == 8'h00) line <= data_i[4:0];
+        else if(reg_addr_i==8'h01) cursor_x <=data_i[6:0];
+        else if(reg_addr_i==8'h02) cursor_y <=data_i[4:0];
+        else if(reg_addr_i==8'h03) cursor_visible <= data_i[0];
     end
 end
 
 assign data_o = data_o_reg;
+
+
+// Cursor counter
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0)
+    begin
+        cursor_cnt <= 24'd0;
+    end
+    else if(cursor_cnt == 24'hffffff) cursor_cnt <= 24'd0; 
+    else cursor_cnt <= cursor_cnt + 24'd1;
+
+end
+
+assign cursor_active = (cursor_cnt > 24'h800000) && cursor_visible;
 
 // Character addressing
 wire    [11:0]  char_x_offset;
@@ -183,6 +216,8 @@ wire    [7:0]   char;
 wire    [7:0]   charbuf_data_o;
 wire    [11:0]  charbuf_addr;
 wire    [11:0]  charbuf_waddr;
+
+wire    [7:0]   char_cur;
 
 assign char_x_offset = H_cnt-12'd149;      
 assign char_x = char_x_offset[9:3];
@@ -224,7 +259,9 @@ assign font_x = H_cnt[2:0]-6;
 assign y_offset = V_cnt - 12'd35;
 assign font_y = y_offset[3:0]; 
 assign font_addr = {char, font_y};
-assign font_out = font_data[7'd7-font_x];
+assign char_cur[6:0] = char[6:0];
+assign char_cur[7] = (cursor_active && (char_x == cursor_x) && (char_y == cursor_y)) ? ~char[7] : char[7];
+assign font_out = char_cur[7] ? ~font_data[7'd7-font_x] : font_data[7'd7-font_x];
 
 fontrom fontrom_inst(
     .clk(clk_i),
