@@ -40,6 +40,7 @@
 // 0x0001 UART
 // 0x0002 LEDs
 // 0x0003 SD card
+// 0x0004 Video
 
 module nano6502_top
 (
@@ -88,6 +89,9 @@ wire    [7:0]   ledwire;
 wire            sd_cs;
 wire    [7:0]   sd_data_o;
 
+wire            video_cs;
+wire    [7:0]   video_data_o;
+
 assign rst_n = ~rst_i;
 assign rst_p = rst_i;
 
@@ -119,7 +123,8 @@ addr_decoder addr_dec(
         .rom_cs(rom_cs),
         .addr_dec_cs(addr_dec_cs),
         .led_cs(led_cs),
-        .sd_cs(sd_cs)
+        .sd_cs(sd_cs),
+        .video_cs(video_cs)
 );
 
 T65 CPU(
@@ -196,6 +201,11 @@ sd_interface sd_inst(
 video video_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr[7:0]),
+    .data_i(cpu_data_o),
+    .video_cs(video_cs),
+    .data_o(video_data_o),
     .tmds_clk_p_o(tmds_clk_p),
     .tmds_clk_n_o(tmds_clk_n),
     .tmds_data_p_o(tmds_data_p),
@@ -209,6 +219,7 @@ always @(*) begin
     else if(uart_cs == 1'b1) cpu_data_i <= uart_data_o;
     else if(addr_dec_cs == 1'b1) cpu_data_i <= addr_dec_data_o;
     else if(led_cs == 1'b1) cpu_data_i <= led_data_o;
+    else if(video_cs == 1'b1) cpu_data_i <= video_data_o;
     else cpu_data_i <= cpu_data_o;
 end
 

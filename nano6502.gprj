@@ -14,6 +14,7 @@
         <File path="src/UART/uart_tx.v" type="file.verilog" enable="1"/>
         <File path="src/addr_decoder.v" type="file.verilog" enable="1"/>
         <File path="src/bootrom.v" type="file.verilog" enable="1"/>
+        <File path="src/charbuf_dpram/charbuf_dpram.v" type="file.verilog" enable="1"/>
         <File path="src/dvi_tx/dvi_tx.v" type="file.verilog" enable="1"/>
         <File path="src/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
         <File path="src/instram.v" type="file.verilog" enable="1"/>

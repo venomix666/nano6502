@@ -2,21 +2,12 @@
 //
 // Sync generation is based on the example from Gowin Semi.
 //
+// Registers:
+// 00       - Line (selects which line is avaible at FE80-FECF
+// 80-CF    - Line data
+
 // 640x480 info:
-/*  Name          640x480p60
-    Standard      Historical
-    VIC                    1
-    Short Name       DMT0659
-    Aspect Ratio         4:3
-
-    Pixel Clock       25.175 MHz
-    TMDS Clock       251.750 MHz
-    Pixel Time          39.7 ns ±0.5%
-    Horizontal Freq.  31.469 kHz
-    Line Time           31.8 μs
-    Vertical Freq.    59.940 Hz
-    Frame Time          16.7 ms
-
+/*  
     Horizontal Timings
     Active Pixels        640
     Front Porch           16
@@ -39,6 +30,11 @@
 module video(
     input               clk_i,
 	input               rst_n_i,
+    input               R_W_n,
+	input   [7:0]       reg_addr_i,
+    input   [7:0]       data_i,
+    input               video_cs,
+    output  [7:0]       data_o,
     output              tmds_clk_p_o,
     output              tmds_clk_n_o,
     output [2:0]        tmds_data_p_o,
@@ -152,6 +148,31 @@ begin
 		end
 end
 
+// CPU interface
+reg     [7:0]   data_o_reg;
+reg     [4:0]   line;
+
+always @(*)
+begin
+    if(reg_addr_i == 8'h00) data_o_reg <= {3'd0, line};
+    else if(reg_addr_i[7] && (reg_addr_i[6:0] < 80)) data_o_reg <= charbuf_data_o;
+    else data_o_reg <= 8'd0;
+end
+
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0)
+    begin
+        line <= 5'd0;
+    end
+    else if(!R_W_n && video_cs)
+    begin
+        if(reg_addr_i == 8'h00) line <= data_i[4:0];
+    end
+end
+
+assign data_o = data_o_reg;
+
 // Character addressing
 wire    [11:0]  char_x_offset;
 wire    [11:0]  char_y_offset;
@@ -159,11 +180,37 @@ wire    [6:0]   char_x;
 wire    [4:0]   char_y;
 wire    [7:0]   char;
 
+wire    [7:0]   charbuf_data_o;
+wire    [11:0]  charbuf_addr;
+wire    [11:0]  charbuf_waddr;
+
 assign char_x_offset = H_cnt-12'd149;      
 assign char_x = char_x_offset[9:3];
 assign char_y_offset = V_cnt-12'd35;
 assign char_y = char_y_offset[8:4];
-assign char = char_y+char_x;
+//assign char = char_y+char_x;
+assign charbuf_addr = {char_y, 4'd0}+{char_y, 6'd0}+char_x;  // Y*80 + X
+assign charbuf_waddr = {line, 4'd0}+{line, 6'd0}+reg_addr_i[6:0];
+
+// Character buffer - PORT A connects to CPU, PORT B connector to character generator
+charbuf_dpram charbuf(
+        .douta(charbuf_data_o), //output [7:0] douta
+        .doutb(char), //output [7:0] doutb
+        .clka(~clk_i), //input clka
+        .ocea(1'b1), //input ocea
+        .cea(1'b1), //input cea
+        .reseta(1'b0), //input reseta
+        .wrea(~R_W_n && video_cs && reg_addr_i[7] && (reg_addr_i[6:0] < 80)), //input wrea
+        .clkb(clk_i), //input clkb
+        .oceb(1'b1), //input oceb
+        .ceb(1'b1), //input ceb
+        .resetb(1'b0), //input resetb
+        .wreb(1'b0), //input wreb
+        .ada(charbuf_waddr), //input [11:0] ada
+        .dina(data_i), //input [7:0] dina
+        .adb(charbuf_addr), //input [11:0] adb
+        .dinb(8'd0) //input [7:0] dinb
+    );
 
 // Font drawing
 wire    [2:0]   font_x;
@@ -173,7 +220,7 @@ wire    [10:0]  font_addr;
 wire    [7:0]   font_data;
 wire            font_out;
 
-assign font_x = H_cnt[2:0]-5;
+assign font_x = H_cnt[2:0]-6;
 assign y_offset = V_cnt - 12'd35;
 assign font_y = y_offset[3:0]; 
 assign font_addr = {char, font_y};
