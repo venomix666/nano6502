@@ -7,6 +7,8 @@
 // 01       - Cursor X
 // 02       - Cursor Y
 // 03       - Cursor visible
+// 04       - Scroll up strobe
+// 05       - Scroll down strobe
 // 80-CF    - Line data
 
 // 640x480 info:
@@ -158,6 +160,8 @@ reg     [6:0]   cursor_x;
 reg     [4:0]   cursor_y;
 reg             cursor_visible;
 reg     [23:0]  cursor_cnt;
+reg             scroll_up;
+reg             scroll_down;
 
 wire            cursor_active;
 
@@ -178,6 +182,8 @@ begin
         line <= 5'd0;
         cursor_x <= 7'd0;
         cursor_y <= 4'd0;
+        scroll_up <= 1'd0;
+        scroll_down <= 1'd0;
         cursor_visible <= 1'd1;
     end
     else if(!R_W_n && video_cs)
@@ -186,13 +192,43 @@ begin
         else if(reg_addr_i==8'h01) cursor_x <=data_i[6:0];
         else if(reg_addr_i==8'h02) cursor_y <=data_i[4:0];
         else if(reg_addr_i==8'h03) cursor_visible <= data_i[0];
+        else if(reg_addr_i==8'h04) scroll_up <= 1'd1;
+        else if(reg_addr_i==8'h05) scroll_down <= 1'd1;
+        else
+        begin
+            scroll_up <= 1'd0;
+            scroll_down <= 1'd0;
+        end
+    end
+    else
+    begin
+        scroll_up <= 1'd0;
+        scroll_down <= 1'd0;
     end
 end
 
 assign data_o = data_o_reg;
 
+// Scrolling
+reg [4:0] start_y;
+localparam LINES = 30;
 
-// Cursor counter
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0)
+    begin 
+        start_y <= 5'd0;
+    end
+    else if(scroll_up)
+        start_y <= (start_y + 1) % LINES;
+    else if(scroll_down)
+    begin
+        if(start_y == 0) start_y <= LINES - 1;
+        else start_y <= start_y - 1;
+    end
+end
+
+// Cursor blink counter
 always @(posedge clk_i or negedge rst_n_i)
 begin
     if(rst_n_i == 1'b0)
@@ -211,6 +247,8 @@ wire    [11:0]  char_x_offset;
 wire    [11:0]  char_y_offset;
 wire    [6:0]   char_x;
 wire    [4:0]   char_y;
+wire    [4:0]   scroll_y;
+wire    [4:0]   scroll_line;
 wire    [7:0]   char;
 
 wire    [7:0]   charbuf_data_o;
@@ -223,9 +261,11 @@ assign char_x_offset = H_cnt-12'd149;
 assign char_x = char_x_offset[9:3];
 assign char_y_offset = V_cnt-12'd35;
 assign char_y = char_y_offset[8:4];
+assign scroll_y = (char_y + start_y) % LINES;
+assign scroll_line = (line + start_y) % LINES;
 //assign char = char_y+char_x;
-assign charbuf_addr = {char_y, 4'd0}+{char_y, 6'd0}+char_x;  // Y*80 + X
-assign charbuf_waddr = {line, 4'd0}+{line, 6'd0}+reg_addr_i[6:0];
+assign charbuf_addr = {scroll_y, 4'd0}+{scroll_y, 6'd0}+char_x;  // Y*80 + X
+assign charbuf_waddr = {scroll_line, 4'd0}+{scroll_line, 6'd0}+reg_addr_i[6:0];
 
 // Character buffer - PORT A connects to CPU, PORT B connector to character generator
 charbuf_dpram charbuf(
