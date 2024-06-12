@@ -9,6 +9,11 @@
 // 03       - Cursor visible
 // 04       - Scroll up strobe
 // 05       - Scroll down strobe
+// 06       - tty write character
+// 07       - tty busy flag
+// 08       - Clear to EOL strobe
+// 09       - Clear screen strobe
+// 0A       - tty output enabled
 // 80-CF    - Line data
 
 // 640x480 info:
@@ -58,6 +63,15 @@ localparam      I_v_res         = 12'd480;
 localparam      I_hs_pol        = 1'd0;
 localparam      I_vs_pol        = 1'd0;
 //localparam      char            = 7'h30;
+
+localparam  [3:0]   IDLE = 4'd0,
+                    WRITE_CHAR = 4'd1,
+                    CLEAR_TO_EOL_INIT = 4'd2,
+                    CLEAR_TO_EOL_RUN = 4'd3,
+                    MOVE_CURSOR_X = 4'd4,
+                    MOVE_CURSOR_Y = 4'd5,
+                    CLEAR_SCREEN_INIT = 4'd6,
+                    CLEAR_SCREEN_RUN = 4'd7;
 
 localparam N = 5; //delay N clocks
 
@@ -157,12 +171,19 @@ end
 reg     [7:0]   data_o_reg;
 reg     [4:0]   line;
 reg     [6:0]   cursor_x;
+reg     [6:0]   cursor_x_pre;
+reg             cursor_x_strobe;
 reg     [4:0]   cursor_y;
+reg     [4:0]   cursor_y_pre;
+reg             cursor_y_strobe;
 reg             cursor_visible;
 reg     [23:0]  cursor_cnt;
 reg             scroll_up;
 reg             scroll_down;
-
+reg             tty_write_strobe;
+reg             clear_to_eol_strobe;
+reg             clear_screen_strobe;
+reg             tty_enabled;
 wire            cursor_active;
 
 always @(*)
@@ -171,6 +192,7 @@ begin
     else if(reg_addr_i == 8'h01) data_o_reg <= {1'd0, cursor_x};
     else if(reg_addr_i == 8'h02) data_o_reg <= {3'd0, cursor_y};
     else if(reg_addr_i == 8'h03) data_o_reg <= {7'd0, cursor_visible};
+    else if(reg_addr_i == 8'h07) data_o_reg <= {7'd0, tty_busy};
     else if(reg_addr_i[7] && (reg_addr_i[6:0] < 80)) data_o_reg <= charbuf_data_o;
     else data_o_reg <= 8'd0;
 end
@@ -180,34 +202,235 @@ begin
     if(rst_n_i == 1'b0)
     begin
         line <= 5'd0;
-        cursor_x <= 7'd0;
-        cursor_y <= 4'd0;
+        cursor_x_pre <= 7'd0;
+        cursor_y_pre <= 4'd0;
+        cursor_x_strobe <= 1'd0;
+        cursor_y_strobe <= 1'd0;
         scroll_up <= 1'd0;
         scroll_down <= 1'd0;
         cursor_visible <= 1'd1;
+        tty_wdata_pre <= 8'd0;
+        tty_write_strobe <=1'd0;
+        clear_to_eol_strobe <= 1'd0;
+        clear_screen_strobe <= 1'd1;
+        tty_enabled <= 1'd1;
     end
     else if(!R_W_n && video_cs)
     begin
         if(reg_addr_i == 8'h00) line <= data_i[4:0];
-        else if(reg_addr_i==8'h01) cursor_x <=data_i[6:0];
-        else if(reg_addr_i==8'h02) cursor_y <=data_i[4:0];
+        else if(reg_addr_i==8'h01) 
+        begin
+            cursor_x_pre <= data_i[6:0];
+            cursor_x_strobe <= 1'd1;
+        end
+        else if(reg_addr_i==8'h02) 
+        begin
+            cursor_y_pre <= data_i[4:0];
+            cursor_y_strobe <= 1'd1;
+        end
         else if(reg_addr_i==8'h03) cursor_visible <= data_i[0];
         else if(reg_addr_i==8'h04) scroll_up <= 1'd1;
         else if(reg_addr_i==8'h05) scroll_down <= 1'd1;
+        else if(reg_addr_i==8'h06)
+        begin
+            tty_wdata_pre <= data_i;
+            tty_write_strobe <= 1'd1;
+        end
+        else if(reg_addr_i==8'h08) clear_to_eol_strobe <= 1'd1;
+        else if(reg_addr_i==8'h09) clear_screen_strobe <= 1'd1;
+        else if(reg_addr_i==8'h0a) tty_enabled = data_i[0];
         else
         begin
             scroll_up <= 1'd0;
             scroll_down <= 1'd0;
+            cursor_x_strobe <= 1'd0;
+            cursor_y_strobe <= 1'd0;
+            tty_write_strobe <= 1'd0;
+            clear_to_eol_strobe <= 1'd0;
+            clear_screen_strobe <= 1'd0;
         end
     end
     else
     begin
         scroll_up <= 1'd0;
         scroll_down <= 1'd0;
+        cursor_x_strobe <= 1'd0;
+        cursor_y_strobe <= 1'd0;
+        tty_write_strobe <= 1'd0;
+        clear_to_eol_strobe <= 1'd0;
+        clear_screen_strobe <= 1'd0;
     end
 end
 
 assign data_o = data_o_reg;
+
+// tty state machine
+reg [3:0]   tty_state;
+reg [3:0]   return_state;
+reg [7:0]   tty_wdata;
+reg [7:0]   tty_wdata_pre;
+reg         tty_we;
+reg [11:0]  tty_waddr;
+reg         tty_scroll;
+reg [6:0]   tty_clr_cnt;
+reg [4:0]   tty_clr_y;
+wire        tty_busy;
+
+assign tty_busy = (tty_state != IDLE);
+
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0)
+    begin
+        tty_state <= IDLE;
+        return_state <= IDLE;
+        cursor_x <= 7'd0;
+        cursor_y <= 5'd0;
+        tty_we <= 1'd0;
+        tty_waddr <= 12'd0;
+        tty_scroll <= 1'd0;
+        tty_clr_cnt <= 7'd0;
+        tty_clr_y <= 5'd0;
+        tty_wdata <= 7'd0;
+    end
+    else
+    begin
+        case(tty_state)
+            IDLE:
+            begin
+                if(cursor_x_strobe) tty_state <= MOVE_CURSOR_X;
+                else if(cursor_y_strobe) tty_state <= MOVE_CURSOR_Y;
+                else if(tty_write_strobe && tty_enabled) tty_state <= WRITE_CHAR;
+                else if(clear_to_eol_strobe) tty_state <= CLEAR_TO_EOL_INIT;
+                else if(clear_screen_strobe) tty_state <= CLEAR_SCREEN_INIT;
+                else tty_state <= IDLE;
+                
+                tty_we <= 1'd0;
+                tty_scroll <= 1'd0;
+                tty_clr_cnt <= 7'd0;
+                return_state <= IDLE;
+            end
+            WRITE_CHAR:
+            begin
+                if(tty_wdata_pre == 8'h0d) 
+                begin
+                    cursor_x <= 7'd0;
+                    tty_state <= IDLE;
+                end
+                else if(tty_wdata_pre == 8'h0a)
+                begin
+                    if(cursor_y < 5'd29) 
+                    begin
+                        cursor_y <= cursor_y + 1;
+                        tty_state <= IDLE;
+                        tty_scroll <= 1'd0;
+                    end
+                    else
+                    begin
+                        cursor_y <= cursor_y;
+                        tty_scroll <= 1'd1;
+                        return_state <= IDLE;
+                        tty_state <= CLEAR_TO_EOL_INIT;
+                    end
+                end
+                else if(tty_wdata_pre == 8'h08)
+                begin
+                    tty_wdata <= 8'd0;
+                    tty_we <= 1'd1;
+                    tty_waddr <= {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+cursor_x-1;
+                    if(cursor_x > 0) cursor_x <= cursor_x - 1;
+                    tty_state <= IDLE;
+                end
+                else
+                begin
+                    tty_we <= 1'd1;
+                    tty_waddr <= {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+cursor_x;
+                    tty_wdata <= tty_wdata_pre;
+                    if(cursor_x < 7'd79) 
+                    begin
+                        cursor_x <= cursor_x + 1;
+                        tty_state <= IDLE;
+                        tty_scroll <= 1'd0;
+                    end
+                    else
+                    begin
+                        cursor_x <= 7'd0;
+                        if(cursor_y < 5'd29) 
+                        begin
+                            cursor_y <= cursor_y + 1;
+                            tty_state <= IDLE;
+                            tty_scroll <= 1'd0;
+                        end
+                        else
+                        begin
+                            cursor_y <= cursor_y;
+                            tty_scroll <= 1'd1;
+                            return_state <= IDLE;
+                            tty_state <= CLEAR_TO_EOL_INIT;
+                        end
+                    end
+                end
+            end
+            MOVE_CURSOR_X:
+            begin
+                cursor_x <= cursor_x_pre;
+                tty_state <= IDLE;
+            end
+            MOVE_CURSOR_Y:
+            begin
+                cursor_y <= cursor_y_pre;
+                tty_state <= IDLE;
+            end
+            CLEAR_TO_EOL_INIT:
+            begin
+                tty_scroll <= 1'd0;
+                tty_clr_cnt <= cursor_x;
+                tty_state <= CLEAR_TO_EOL_RUN;
+                tty_wdata <= 8'd0;
+            end
+            CLEAR_TO_EOL_RUN:
+            begin
+                if(tty_clr_cnt < 7'd79)
+                begin
+                    tty_we <= 1'd1;
+                    tty_wdata <= 8'd0;
+                    tty_waddr <= {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+tty_clr_cnt;
+                    tty_clr_cnt <= tty_clr_cnt + 1;
+                    tty_state <= CLEAR_TO_EOL_RUN;
+                end
+                else
+                begin
+                    tty_we <= 1'd0;
+                    tty_state <= return_state;
+                end
+            end
+            CLEAR_SCREEN_INIT:
+            begin
+                cursor_x <= 7'd0;
+                cursor_y <= 5'd0;
+                tty_clr_y <= 5'd0;
+                tty_state <= CLEAR_SCREEN_RUN;
+            end
+            CLEAR_SCREEN_RUN:
+            begin
+                if(tty_clr_y < 5'd31)
+                begin
+                    return_state <= CLEAR_SCREEN_RUN;
+                    tty_clr_y <= tty_clr_y + 1;
+                    cursor_y <= tty_clr_y - 1;
+                    tty_state <= CLEAR_TO_EOL_INIT;
+                end
+                else
+                begin
+                    tty_state <= IDLE;
+                    cursor_y <= 5'd0;
+                end
+            end
+            default: tty_state <= IDLE;
+        endcase
+    end
+end
+
 
 // Scrolling
 reg [4:0] start_y;
@@ -219,7 +442,7 @@ begin
     begin 
         start_y <= 5'd0;
     end
-    else if(scroll_up)
+    else if(scroll_up || tty_scroll)
         start_y <= (start_y + 1) % LINES;
     else if(scroll_down)
     begin
@@ -254,7 +477,8 @@ wire    [7:0]   char;
 wire    [7:0]   charbuf_data_o;
 wire    [11:0]  charbuf_addr;
 wire    [11:0]  charbuf_waddr;
-
+wire    [11:0]  charbuf_raddr;
+//wire    [11:0]   tty_waddr;
 wire    [7:0]   char_cur;
 
 assign char_x_offset = H_cnt-12'd149;      
@@ -266,6 +490,8 @@ assign scroll_line = (line + start_y) % LINES;
 //assign char = char_y+char_x;
 assign charbuf_addr = {scroll_y, 4'd0}+{scroll_y, 6'd0}+char_x;  // Y*80 + X
 assign charbuf_waddr = {scroll_line, 4'd0}+{scroll_line, 6'd0}+reg_addr_i[6:0];
+//assign tty_waddr = {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+cursor_x;
+assign charbuf_raddr = tty_we ? tty_waddr : charbuf_addr;
 
 // Character buffer - PORT A connects to CPU, PORT B connector to character generator
 charbuf_dpram charbuf(
@@ -280,11 +506,11 @@ charbuf_dpram charbuf(
         .oceb(1'b1), //input oceb
         .ceb(1'b1), //input ceb
         .resetb(1'b0), //input resetb
-        .wreb(1'b0), //input wreb
+        .wreb(tty_we), //input wreb
         .ada(charbuf_waddr), //input [11:0] ada
         .dina(data_i), //input [7:0] dina
-        .adb(charbuf_addr), //input [11:0] adb
-        .dinb(8'd0) //input [7:0] dinb
+        .adb(charbuf_raddr), //input [11:0] adb
+        .dinb(tty_wdata) //input [7:0] dinb
     );
 
 // Font drawing

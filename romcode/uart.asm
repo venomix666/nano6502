@@ -3,9 +3,14 @@ UART_tx_done    =     $fe01
 UART_rx_data    =     $fe02
 UART_rx_avail   =     $fe03
 
+TTY_busy        =     $fe07
+TTY_out         =     $fe06
+
 IO_bank         =     $00
 IO_bank_val     =     $01
 IO_bank_temp    =     $04
+
+IO_bank_tty     =     $04
 ;
 ; input chr from UART (waiting)
 ;
@@ -68,6 +73,17 @@ UART_Output_Wait:
     beq UART_Output_Wait
     pla
     sta UART_tx_data
+    
+    pha
+
+    lda #IO_bank_tty
+    sta IO_bank
+TTY_Output_Wait:
+    lda TTY_busy
+    bne TTY_Output_Wait
+    pla
+    sta TTY_out       
+    
     lda IO_bank_temp
     sta IO_bank
     rts
