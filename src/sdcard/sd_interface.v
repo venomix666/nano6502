@@ -133,11 +133,15 @@ begin
     end
     else if(state == READING)
     begin
-        if(rdone) state <= IDLE;
+        if(!rbusy) state <= IDLE;
+        rd<=1'b0;
+        wr<=1'b0;
     end
     else if(state == WRITING)
     begin
-        if(rdone) state <= IDLE;
+        if(!rbusy) state <= IDLE;
+        rd<=1'b0;
+        wr<=1'b0;
     end
     else if((sd_cs) && (!R_W_n))
     begin

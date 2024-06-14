@@ -25,6 +25,8 @@ SD_load:
     sta curr_bank
 set_sector:
     ; wait until not busy
+    lda #'B'
+    jsr UART_Output
     lda sd_busy
     bne set_sector
 
@@ -47,18 +49,12 @@ sector_read:
     lda #1
     sta sd_read_strobe
 read_wait:
-    ldx #$ff
-read_wait_inner:
-    dex
-    bne read_wait_inner
-    ; wait until done
-    lda sd_done
-    cmp #0
-    beq read_wait
+    ; wait until not busy
+    lda #'C'
+    jsr UART_Output
+    lda sd_busy
+    bne read_wait
     
-    ; Extra read just to clear flag?
-    lda sd_done
-
     ; copy sector data to ram    
 bank_loop:
     ldx #$80
@@ -98,7 +94,5 @@ inc_done:
     jmp set_sector
        
 all_done:
-    ; Clear done flag (not sure why this is needed...)
-    lda sd_done
     jmp RESET
 
