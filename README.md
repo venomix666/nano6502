@@ -6,8 +6,10 @@ Planned features for the first version are:
 * 8k ROM which can be switched out (also block RAM)
 * UART (implemented)
 * SD card storage (implemented)
-* 80-column text mode HDMI video output (not implemented yet)
+* 80-column text mode HDMI video output, 640x480 60 Hz (implemented)
 * USB keyboard support (not implemented yet)
+
+A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) exists. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
 
 ## Set up PLL
 In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
@@ -47,6 +49,18 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe07:  Sector data page register (0-3), selects which 128 bytes of the sector are availabe on 0xfe80-0xfeff  
 0xfe08:  SD card status (debug only)  
 0xfe09:  SD card type (debug only)  
-0xfe0a:  SD operation done (debug only)  
 0xfe80 - 0xfeff: 128 byte data page, paged by the page register so that all 512 bytes can be accessed  
 
+### Video/TTY:
+0xfe00:  Active line - selects which line in memory that is available at 0xfe80
+0xfe01:  Cursor X position
+0xfe02:  Cursor Y position
+0xfe03:  Cursor visible
+0xfe04:  Scroll up strobe
+0xfe05:  Scroll down strobe
+0xfe06:  TTY write character
+0xfe07:  Busy flag - no registers can be changed when this is high
+0xfe08:  Clear to end-of-line strobe
+0xfe09:  Clear screen strobe
+0xfe0a:  TTY enabled
+0xfe80 - 0xfeff: Active line data, for direct access
