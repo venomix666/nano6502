@@ -9,7 +9,9 @@ Planned features for the first version are:
 * 80-column text mode HDMI video output, 640x480 60 Hz (implemented)
 * USB keyboard support (not implemented yet)
 
-A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) exists. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
+A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
+![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
+
 
 ## Set up PLL
 In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
@@ -52,15 +54,15 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe80 - 0xfeff: 128 byte data page, paged by the page register so that all 512 bytes can be accessed  
 
 ### Video/TTY:
-0xfe00:  Active line - selects which line in memory that is available at 0xfe80
-0xfe01:  Cursor X position
-0xfe02:  Cursor Y position
-0xfe03:  Cursor visible
-0xfe04:  Scroll up strobe
-0xfe05:  Scroll down strobe
-0xfe06:  TTY write character
-0xfe07:  Busy flag - no registers can be changed when this is high
-0xfe08:  Clear to end-of-line strobe
-0xfe09:  Clear screen strobe
-0xfe0a:  TTY enabled
-0xfe80 - 0xfeff: Active line data, for direct access
+0xfe00:  Active line - selects which line in memory that is available at 0xfe80  
+0xfe01:  Cursor X position  
+0xfe02:  Cursor Y position  
+0xfe03:  Cursor visible  
+0xfe04:  Scroll up strobe  
+0xfe05:  Scroll down strobe  
+0xfe06:  TTY write character  
+0xfe07:  Busy flag - no registers can be changed when this is high  
+0xfe08:  Clear to end-of-line strobe  
+0xfe09:  Clear screen strobe  
+0xfe0a:  TTY enabled  
+0xfe80 - 0xfeff: Active line data, for direct access  
