@@ -390,7 +390,7 @@ begin
             end
             CLEAR_TO_EOL_RUN:
             begin
-                if(tty_clr_cnt < 7'd79)
+                if(tty_clr_cnt < 7'd80)
                 begin
                     tty_we <= 1'd1;
                     tty_wdata <= 8'd0;

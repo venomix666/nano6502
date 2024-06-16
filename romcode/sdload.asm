@@ -25,8 +25,6 @@ SD_load:
     sta curr_bank
 set_sector:
     ; wait until not busy
-    lda #'B'
-    jsr UART_Output
     lda sd_busy
     bne set_sector
 
@@ -50,8 +48,6 @@ sector_read:
     sta sd_read_strobe
 read_wait:
     ; wait until not busy
-    lda #'C'
-    jsr UART_Output
     lda sd_busy
     bne read_wait
     
@@ -94,5 +90,5 @@ inc_done:
     jmp set_sector
        
 all_done:
-    jmp RESET
+    rts
 

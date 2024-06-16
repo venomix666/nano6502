@@ -3,4 +3,5 @@
 .segment "BIOS"
 .include "uart.asm"
 .include "sdload.asm"
+.include "boot.asm"
 .include "wozmon.asm"
