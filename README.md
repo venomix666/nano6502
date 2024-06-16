@@ -1,5 +1,5 @@
 # nano6502
-6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).
+nano6502 is a 6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).
 
 Planned features for the first version are:  
 * 64 k RAM (currently implemented with block RAM)
@@ -66,3 +66,9 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe09:  Clear screen strobe  
 0xfe0a:  TTY enabled  
 0xfe80 - 0xfeff: Active line data, for direct access  
+
+### Credits
+Some parts in this project are reused from other projects:  
+The T65 core in Verilog is reused from [NESTang](https://github.com/nand2mario/nestang/)  
+The low-level SD-card state-machine is reused from [MiSTeryNano](https://github.com/harbaum/MiSTeryNano/)  
+
