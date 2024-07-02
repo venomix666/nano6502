@@ -92,6 +92,9 @@ wire    [7:0]   sd_data_o;
 wire            video_cs;
 wire    [7:0]   video_data_o;
 
+wire            timer_cs;
+wire    [7:0]   timer_data_o;
+
 assign rst_n = ~rst_i;
 assign rst_p = rst_i;
 
@@ -124,7 +127,8 @@ addr_decoder addr_dec(
         .addr_dec_cs(addr_dec_cs),
         .led_cs(led_cs),
         .sd_cs(sd_cs),
-        .video_cs(video_cs)
+        .video_cs(video_cs),
+        .timer_cs(timer_cs)
 );
 
 T65 CPU(
@@ -154,6 +158,23 @@ T65 CPU(
         .DEBUG(),
         .NMI_ack()
 );
+
+//wire    WE;
+
+/*cpu_65c02 cpuinst(
+        .clk(clk_i),
+        .reset(rst_p),
+        .AB(cpu_addr),
+        .DI(cpu_data_i),
+        .DO(cpu_data_o),
+        .WE(WE),
+        .IRQ(1'b0),
+        .NMI(1'b0), 
+        .RDY(1'b1),
+        .SYNC()
+);*/
+
+//assign R_W_n = ~WE;
 
 uart uart_inst(
         .clk(clk_i),
@@ -212,6 +233,16 @@ video video_inst(
     .tmds_data_n_o(tmds_data_n)
 );
 
+timer timer_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr[1:0]),
+    .data_i(cpu_data_o),
+    .timer_cs(timer_cs),
+    .data_o(timer_data_o)    
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i <= rom_data_o;
     else if(sd_cs == 1'b1) cpu_data_i <= sd_data_o;
@@ -220,7 +251,8 @@ always @(*) begin
     else if(addr_dec_cs == 1'b1) cpu_data_i <= addr_dec_data_o;
     else if(led_cs == 1'b1) cpu_data_i <= led_data_o;
     else if(video_cs == 1'b1) cpu_data_i <= video_data_o;
-    else cpu_data_i <= cpu_data_o;
+    else if(timer_cs == 1'b1) cpu_data_i <= timer_data_o;
+    else cpu_data_i <= 8'd0;//cpu_data_o;
 end
 
 endmodule

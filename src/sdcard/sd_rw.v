@@ -8,7 +8,7 @@
 //--------------------------------------------------------------------------------------------------------
 
 module sd_rw # (
-    parameter [2:0] CLK_DIV = 3'd2,     // when clk =   0~ 25MHz , set CLK_DIV = 3'd1,
+    parameter [2:0] CLK_DIV = 3'd3,     // when clk =   0~ 25MHz , set CLK_DIV = 3'd1,
                                         // when clk =  25~ 50MHz , set CLK_DIV = 3'd2,
                                         // when clk =  50~100MHz , set CLK_DIV = 3'd3,
                                         // when clk = 100~200MHz , set CLK_DIV = 3'd4,

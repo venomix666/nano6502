@@ -20,7 +20,7 @@ module leds(
 
 parameter WS2812_NUM    = 0             ; // LED number of WS2812 (starts from 0)
 parameter WS2812_WIDTH  = 24            ; // WS2812 data bit width
-parameter CLK_FRE               = 27_000_000    ; // CLK frequency (mHZ)
+parameter CLK_FRE               = 25_175_000    ; // CLK frequency (mHZ)
 
 parameter DELAY_1_HIGH  = (CLK_FRE / 1_000_000 * 0.85 )  - 1; //≈850ns±150ns    1 high level time
 parameter DELAY_1_LOW   = (CLK_FRE / 1_000_000 * 0.40 )  - 1; //≈400ns±150ns    1 low level time
