@@ -483,6 +483,8 @@ wire    [11:0]  charbuf_waddr;
 wire    [11:0]  charbuf_raddr;
 //wire    [11:0]   tty_waddr;
 wire    [7:0]   char_cur;
+reg     [6:0]   char_x_delay;
+
 
 assign char_x_offset = H_cnt-12'd148;//-12'd149;      
 assign char_x = char_x_offset[9:3];
@@ -495,6 +497,9 @@ assign charbuf_addr = {scroll_y, 4'd0}+{scroll_y, 6'd0}+char_x;  // Y*80 + X
 assign charbuf_waddr = {scroll_line, 4'd0}+{scroll_line, 6'd0}+reg_addr_i[6:0];
 //assign tty_waddr = {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+cursor_x;
 assign charbuf_raddr = tty_we ? tty_waddr : charbuf_addr;
+
+always @(posedge clk_i)
+    char_x_delay <= char_x;
 
 // Character buffer - PORT A connects to CPU, PORT B connector to character generator
 charbuf_dpram charbuf(
@@ -529,7 +534,7 @@ assign y_offset = V_cnt - 12'd35;
 assign font_y = y_offset[3:0]; 
 assign font_addr = {char, font_y};
 assign char_cur[6:0] = char[6:0];
-assign char_cur[7] = (cursor_active && (char_x == cursor_x) && (char_y == cursor_y)) ? ~char[7] : char[7];
+assign char_cur[7] = (cursor_active && (char_x_delay == cursor_x) && (char_y == cursor_y)) ? ~char[7] : char[7];
 assign font_out = char_cur[7] ? ~font_data[7'd7-font_x] : font_data[7'd7-font_x];
 
 fontrom fontrom_inst(

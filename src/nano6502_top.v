@@ -220,6 +220,7 @@ sd_interface sd_inst(
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
     .reg_addr_i(cpu_addr_w[7:0]),
+    .reg_addr_r_i(cpu_addr[7:0]),
     .data_i(cpu_data_o),
     .sd_cs(sd_cs),
     .data_o(sd_data_o),
