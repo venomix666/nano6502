@@ -16,6 +16,7 @@ module sd_interface(
 	input               rst_n_i,
     input               R_W_n,
 	input   [7:0]       reg_addr_i,
+    input   [7:0]       reg_addr_r_i,
     input   [7:0]       data_i,
     input               sd_cs,
     output  [7:0]       data_o,
@@ -35,6 +36,7 @@ reg [7:0]   data_o_reg;
 reg [7:0]   sd_data_o;
 reg [7:0]   page;
 reg [1:0]   state;
+reg [7:0]   data_i_delay;
 
 wire byte_available;
 wire ready_for_next_byte;
@@ -47,6 +49,9 @@ wire [3:0] card_stat;
 wire [1:0] card_type;
 wire [7:0] buf_data_o;
 
+always @(posedge clk_i)
+    data_i_delay <= data_i;
+
 sector_dpram buffer(
     .clka(clk_i),
     .reseta(1'b0), 
@@ -57,38 +62,34 @@ sector_dpram buffer(
     .ocea(1'b1), 
     .douta(sd_data_i),
 					
-    .clkb(~clk_i), 
+    .clkb(clk_i), 
     .resetb(1'b0), 
     .ceb(1'b1), 
-    .adb({page[1:0], reg_addr_i[6:0]}), 
+    .adb({page[1:0], R_W_n ? reg_addr_r_i[6:0] : reg_addr_i[6:0]}), 
     .wreb(reg_addr_i[7] && !R_W_n && sd_cs), 
-    .dinb(data_i),
+    .dinb(data_i_delay),
     .oceb(1'b1), 
     .doutb(buf_data_o)					
 );
 
-// Synchronous read
-always @(posedge clk_i or negedge rst_n_i)
+// Asynchronous read
+always @(*)
 begin
-    if(rst_n_i == 1'b0) data_o_reg <= 8'd0;
-    else
-    begin
-        case(reg_addr_i)
-            8'h00: data_o_reg = address[7:0];
-            8'h01: data_o_reg = address[15:8];
-            8'h02: data_o_reg = address[23:16];
-            8'h03: data_o_reg = address[31:24];
-            8'h04: data_o_reg = {7'd0, rbusy};
-            8'h07: data_o_reg = page;
-            8'h08: data_o_reg = {4'd0, card_stat};
-            8'h09: data_o_reg = {6'd0, card_type};
-            default:
-            begin
-                if(reg_addr_i[7]) data_o_reg = buf_data_o;
-                else data_o_reg = 8'd0;
-            end
-        endcase
-    end
+    case(reg_addr_i)
+        8'h00: data_o_reg = address[7:0];
+        8'h01: data_o_reg = address[15:8];
+        8'h02: data_o_reg = address[23:16];
+        8'h03: data_o_reg = address[31:24];
+        8'h04: data_o_reg = {7'd0, rbusy};
+        8'h07: data_o_reg = page;
+        8'h08: data_o_reg = {4'd0, card_stat};
+        8'h09: data_o_reg = {6'd0, card_type};
+        default:
+        begin
+            if(reg_addr_i[7]) data_o_reg = buf_data_o;
+            else data_o_reg = 8'd0;
+        end
+    endcase
 end
 
 // Synchronous write
@@ -149,7 +150,7 @@ end
 
 assign data_o = data_o_reg;
 
-sd_rw #(.CLK_DIV(3), .SIMULATE(0)) sd_rw_inst(
+sd_rw #(.CLK_DIV(2), .SIMULATE(0)) sd_rw_inst(
         .rstn(rst_n_i),
         .clk(clk_i),
         .sdclk(sdclk),
