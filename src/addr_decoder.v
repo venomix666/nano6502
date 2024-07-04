@@ -37,7 +37,6 @@ reg                 video_cs_reg;
 reg                 timer_cs_reg;
 reg                 addr_dec_cs_reg;
 reg     [7:0]       dummy_reg;
-reg     [7:0]       data_o_delay;
 
 // Register writing, synchronous
 always@(posedge clk_i or negedge rst_n_i)
@@ -212,12 +211,7 @@ always @(*) begin
     end
 end
 
-always@(posedge clk_i)
-begin
-    data_o_delay <= data_o_reg;
-end
-
-assign data_o = data_o_delay;
+assign data_o = data_o_reg;
 assign ram_cs = ram_cs_reg;
 assign uart_cs = uart_cs_reg;
 assign rom_cs = rom_cs_reg;

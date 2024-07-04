@@ -169,6 +169,7 @@ end
 
 // CPU interface
 reg     [7:0]   data_o_reg;
+reg     [7:0]   data_i_delay;
 reg     [4:0]   line;
 reg     [6:0]   cursor_x;
 reg     [6:0]   cursor_x_pre;
@@ -185,6 +186,8 @@ reg             clear_to_eol_strobe;
 reg             clear_screen_strobe;
 reg             tty_enabled;
 wire            cursor_active;
+
+always @(posedge clk_i) data_i_delay <= data_i;
 
 always @(*)
 begin
@@ -481,7 +484,7 @@ wire    [11:0]  charbuf_raddr;
 //wire    [11:0]   tty_waddr;
 wire    [7:0]   char_cur;
 
-assign char_x_offset = H_cnt-12'd149;      
+assign char_x_offset = H_cnt-12'd148;//-12'd149;      
 assign char_x = char_x_offset[9:3];
 assign char_y_offset = V_cnt-12'd35;
 assign char_y = char_y_offset[8:4];
@@ -497,7 +500,7 @@ assign charbuf_raddr = tty_we ? tty_waddr : charbuf_addr;
 charbuf_dpram charbuf(
         .douta(charbuf_data_o), //output [7:0] douta
         .doutb(char), //output [7:0] doutb
-        .clka(~clk_i), //input clka
+        .clka(clk_i), //input clka
         .ocea(1'b1), //input ocea
         .cea(1'b1), //input cea
         .reseta(1'b0), //input reseta
@@ -508,7 +511,7 @@ charbuf_dpram charbuf(
         .resetb(1'b0), //input resetb
         .wreb(tty_we), //input wreb
         .ada(charbuf_waddr), //input [11:0] ada
-        .dina(data_i), //input [7:0] dina
+        .dina(data_i_delay), //input [7:0] dina
         .adb(charbuf_raddr), //input [11:0] adb
         .dinb(tty_wdata) //input [7:0] dinb
     );
