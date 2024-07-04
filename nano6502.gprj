@@ -5,10 +5,6 @@
     <Version>5</Version>
     <Device name="GW2AR-18C" pn="GW2AR-LV18QN88C8/I7">gw2ar18c-000</Device>
     <FileList>
-        <File path="src/T65/T65.v" type="file.verilog" enable="1"/>
-        <File path="src/T65/T65_ALU.v" type="file.verilog" enable="1"/>
-        <File path="src/T65/T65_MCode.v" type="file.verilog" enable="1"/>
-        <File path="src/T65/T65_Pack.v" type="file.verilog" enable="1"/>
         <File path="src/UART/uart.v" type="file.verilog" enable="1"/>
         <File path="src/UART/uart_rx.v" type="file.verilog" enable="1"/>
         <File path="src/UART/uart_tx.v" type="file.verilog" enable="1"/>
@@ -24,6 +20,8 @@
         <File path="src/sdcard/sd_rw.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sdcmd_ctrl.v" type="file.verilog" enable="1"/>
         <File path="src/timer.v" type="file.verilog" enable="1"/>
+        <File path="src/verilog-6502/ALU.v" type="file.verilog" enable="1"/>
+        <File path="src/verilog-6502/cpu_65c02.v" type="file.verilog" enable="1"/>
         <File path="src/video/fontrom.v" type="file.verilog" enable="1"/>
         <File path="src/video/video.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.cst" type="file.cst" enable="1"/>

@@ -7,6 +7,7 @@ module addr_decoder(
 	input               rst_n_i,
     input               R_W_n,
 	input   [15:0]      addr_i,
+    input   [15:0]      addr_w_i,
     input   [7:0]       data_i,
     output  [7:0]       data_o,
     // RAM
@@ -59,7 +60,7 @@ end
 
 // Address decoding, combinatorial mux
 always @(*) begin
-    if(addr_i == 16'h0000) 
+    if(addr_w_i == 16'h0000) 
     begin
         data_o_reg = io_bank_l;
         ram_cs_reg = 1'b0;
@@ -71,7 +72,7 @@ always @(*) begin
         timer_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
-    else if(addr_i == 16'h0001) 
+    else if(addr_w_i == 16'h0001) 
     begin    
         data_o_reg = io_bank_h;
         ram_cs_reg = 1'b0;
@@ -83,7 +84,7 @@ always @(*) begin
         timer_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
-    else if(addr_i == 16'h0002)
+    else if(addr_w_i == 16'h0002)
     begin
         data_o_reg = rom_sel;
         ram_cs_reg = 1'b0;
@@ -95,7 +96,7 @@ always @(*) begin
         timer_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
-    else if((addr_i >= 16'hfe00) && (addr_i < 16'hff00))
+    else if((addr_w_i >= 16'hfe00) && (addr_w_i < 16'hff00))
     begin
         case(io_bank_l)
             8'h00:
@@ -185,7 +186,7 @@ always @(*) begin
         endcase
         
     end
-    else if((addr_i >= 16'he000) && (addr_i < 16'hffff) && (rom_sel == 8'd0))
+    else if((addr_w_i >= 16'he000) && (addr_w_i < 16'hffff) && (rom_sel == 8'd0))
     begin
         uart_cs_reg = 1'b0;
         ram_cs_reg = 1'b0;
@@ -211,7 +212,12 @@ always @(*) begin
     end
 end
 
-assign data_o = data_o_reg;
+always@(posedge clk_i)
+begin
+    data_o_delay <= data_o_reg;
+end
+
+assign data_o = data_o_delay;
 assign ram_cs = ram_cs_reg;
 assign uart_cs = uart_cs_reg;
 assign rom_cs = rom_cs_reg;

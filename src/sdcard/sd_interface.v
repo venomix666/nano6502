@@ -67,24 +67,28 @@ sector_dpram buffer(
     .doutb(buf_data_o)					
 );
 
-// Asynchronous read
-always @(*)
+// Synchronous read
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0) data_o_reg <= 8'd0;
+    else
     begin
-    case(reg_addr_i)
-        8'h00: data_o_reg = address[7:0];
-        8'h01: data_o_reg = address[15:8];
-        8'h02: data_o_reg = address[23:16];
-        8'h03: data_o_reg = address[31:24];
-        8'h04: data_o_reg = {7'd0, rbusy};
-        8'h07: data_o_reg = page;
-        8'h08: data_o_reg = {4'd0, card_stat};
-        8'h09: data_o_reg = {6'd0, card_type};
-        default:
-        begin
-            if(reg_addr_i[7]) data_o_reg = buf_data_o;
-            else data_o_reg = 8'd0;
-        end
-    endcase
+        case(reg_addr_i)
+            8'h00: data_o_reg = address[7:0];
+            8'h01: data_o_reg = address[15:8];
+            8'h02: data_o_reg = address[23:16];
+            8'h03: data_o_reg = address[31:24];
+            8'h04: data_o_reg = {7'd0, rbusy};
+            8'h07: data_o_reg = page;
+            8'h08: data_o_reg = {4'd0, card_stat};
+            8'h09: data_o_reg = {6'd0, card_type};
+            default:
+            begin
+                if(reg_addr_i[7]) data_o_reg = buf_data_o;
+                else data_o_reg = 8'd0;
+            end
+        endcase
+    end
 end
 
 // Synchronous write

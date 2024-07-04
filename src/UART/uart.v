@@ -32,6 +32,7 @@ reg                             rx_avail;
 reg                             tx_done;
 reg [7:0]                       data_o_reg;
 
+
 always@(posedge clk or negedge rst_n)
 begin
     if(rst_n == 1'b0)
@@ -49,14 +50,14 @@ begin
     else if(uart_cs)
     begin
         //case(reg_addr)
-            if(reg_addr==2'b00)
+            if(reg_addr==2'b00 && !R_W_n)
             begin
-                if(!R_W_n)
-                begin
+                //if(!rw_dly)
+                //begin
                     tx_done <= 1'b0;
                     tx_data <= data_i;
                     tx_data_valid <= 1'b1;
-                end
+                //end
                 /*else
                 begin
                     data_o_reg <= tx_data;
@@ -87,12 +88,16 @@ end
 
 always@(*)
 begin
-    case (reg_addr)
-        2'b00: data_o_reg <= tx_data;
-        2'b01: data_o_reg <= {7'd0, tx_data_ready};
-        2'b10: data_o_reg <= rx_data_reg;
-        2'b11: data_o_reg <= {7'd0, rx_data_avail}; 
-    endcase
+    //if(rst_n == 1'b0) data_o_reg <= 8'd0;
+    //else
+    //begin
+        case (reg_addr)
+            2'b00: data_o_reg <= tx_data;
+            2'b01: data_o_reg <= {7'd0, tx_data_ready};
+            2'b10: data_o_reg <= rx_data_reg;
+            2'b11: data_o_reg <= {7'd0, rx_data_avail}; 
+        endcase
+    //end
 end
 
 

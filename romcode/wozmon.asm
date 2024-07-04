@@ -17,6 +17,8 @@ CRCCHECK    = $30
 
 RESET:      CLD             ;Clear decimal arithmetic mode.
             CLI
+	    ldx #$FF
+	    txs
 MONSTART:
             jsr boot
             lda #$11

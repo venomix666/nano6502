@@ -1,3 +1,4 @@
+
 ######################################################################
 #
 # DESCRIPTION: Verilator Example: Small Makefile
@@ -21,10 +22,10 @@ endif
 
 N=top
 D=../src
-SRCS=$D/addr_decoder.v $D/nano6502_top.v $D/T65/T65_Pack.v \
-        $D/T65/T65_MCode.v $D/T65/T65_ALU.v $D/T65/T65.v \
-        $D/UART/uart_rx.v $D/UART/uart_tx.v $D/UART/uart.v \
-        $D/bootrom.v $D/instram.v $D/top.v
+SRCS=	$D/addr_decoder.v $D/nano6502_top.v \
+	$D/verilog-6502/ALU.v $D/verilog-6502/cpu_65c02.v \
+	$D/UART/uart_rx.v $D/UART/uart_tx.v $D/UART/uart.v \
+        $D/bootrom.v $D/instram.v $D/leds.v $D/top.v
 
 
 # If $VERILATOR_ROOT isn't in the environment, we assume it is part of a
@@ -47,7 +48,8 @@ VERILATOR_FLAGS += -cc --exe
 VERILATOR_FLAGS += -x-assign fast
 # Warn abount lint issues; may not want this on less solid designs
 #VERILATOR_FLAGS += -Wall
-VERILATOR_FLAGS += -Wno-CASEOVERLAP -Wno-COMBDLY -Wno-WIDTH
+VERILATOR_FLAGS += -Wno-CASEOVERLAP -Wno-COMBDLY -Wno-WIDTH -Wno-CASEINCOMPLETE -Wno-PINMISSING -Wno-CASEX
+
 # Make waveforms
 VERILATOR_FLAGS += --trace
 # Check SystemVerilog assertions
