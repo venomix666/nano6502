@@ -14,6 +14,7 @@
 // 08       - Clear to EOL strobe
 // 09       - Clear screen strobe
 // 0A       - tty output enabled
+// 0B       - Autoscroll and line change enabled
 // 80-CF    - Line data
 
 // 640x480 info:
@@ -38,10 +39,12 @@
 */
 
 module video(
+    input               clk_vid_i,
     input               clk_i,
 	input               rst_n_i,
     input               R_W_n,
 	input   [7:0]       reg_addr_i,
+    input   [7:0]       reg_addr_r_i,
     input   [7:0]       data_i,
     input               video_cs,
     output  [7:0]       data_o,
@@ -102,7 +105,7 @@ reg dvi_oe;
 
 //==============================================================================
 //Generate HS, VS, DE signals
-always@(posedge clk_i or negedge rst_n_i)
+always@(posedge clk_vid_i or negedge rst_n_i)
 begin
 	if(!rst_n_i)
 		V_cnt <= 12'd0;
@@ -118,7 +121,7 @@ begin
 end
 
 //-------------------------------------------------------------    
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_vid_i or negedge rst_n_i)
 begin
 	if(!rst_n_i)
 		H_cnt <=  12'd0; 
@@ -135,7 +138,7 @@ assign  Pout_hs_w =  ~((H_cnt>=12'd0) & (H_cnt<=(I_h_sync-1'b1))) ;
 assign  Pout_vs_w =  ~((V_cnt>=12'd0) & (V_cnt<=(I_v_sync-1'b1))) ;  
 
 //-------------------------------------------------------------
-always@(posedge clk_i or negedge rst_n_i)
+always@(posedge clk_vid_i or negedge rst_n_i)
 begin
 	if(!rst_n_i)
 		begin
@@ -153,7 +156,7 @@ end
 
 assign dvi_de = Pout_de_dn[4];
 
-always@(posedge clk_i or negedge rst_n_i)
+always@(posedge clk_vid_i or negedge rst_n_i)
 begin
 	if(!rst_n_i)
 		begin                        
@@ -170,6 +173,7 @@ end
 // CPU interface
 reg     [7:0]   data_o_reg;
 reg     [7:0]   data_i_delay;
+reg     [7:0]   data_i_d_delay;
 reg     [4:0]   line;
 reg     [6:0]   cursor_x;
 reg     [6:0]   cursor_x_pre;
@@ -185,9 +189,11 @@ reg             tty_write_strobe;
 reg             clear_to_eol_strobe;
 reg             clear_screen_strobe;
 reg             tty_enabled;
+reg             scroll_enabled;
 wire            cursor_active;
 
 always @(posedge clk_i) data_i_delay <= data_i;
+always @(posedge clk_i) data_i_d_delay <= data_i_delay;
 
 always @(*)
 begin
@@ -196,6 +202,8 @@ begin
     else if(reg_addr_i == 8'h02) data_o_reg <= {3'd0, cursor_y};
     else if(reg_addr_i == 8'h03) data_o_reg <= {7'd0, cursor_visible};
     else if(reg_addr_i == 8'h07) data_o_reg <= {7'd0, tty_busy};
+    else if(reg_addr_i == 8'h0a) data_o_reg <= {7'd0, tty_enabled};
+    else if(reg_addr_i == 8'h0b) data_o_reg <= {7'd0, scroll_enabled};
     else if(reg_addr_i[7] && (reg_addr_i[6:0] < 80)) data_o_reg <= charbuf_data_o;
     else data_o_reg <= 8'd0;
 end
@@ -217,31 +225,33 @@ begin
         clear_to_eol_strobe <= 1'd0;
         clear_screen_strobe <= 1'd1;
         tty_enabled <= 1'd1;
+        scroll_enabled <= 1'd1;
     end
     else if(!R_W_n && video_cs)
     begin
-        if(reg_addr_i == 8'h00) line <= data_i[4:0];
+        if(reg_addr_i == 8'h00) line <= data_i_delay[4:0];
         else if(reg_addr_i==8'h01) 
         begin
-            cursor_x_pre <= data_i[6:0];
+            cursor_x_pre <= data_i_delay[6:0];
             cursor_x_strobe <= 1'd1;
         end
         else if(reg_addr_i==8'h02) 
         begin
-            cursor_y_pre <= data_i[4:0];
+            cursor_y_pre <= data_i_delay[4:0];
             cursor_y_strobe <= 1'd1;
         end
-        else if(reg_addr_i==8'h03) cursor_visible <= data_i[0];
+        else if(reg_addr_i==8'h03) cursor_visible <= data_i_delay[0];
         else if(reg_addr_i==8'h04) scroll_up <= 1'd1;
         else if(reg_addr_i==8'h05) scroll_down <= 1'd1;
         else if(reg_addr_i==8'h06)
         begin
-            tty_wdata_pre <= data_i;
+            tty_wdata_pre <= data_i_delay;
             tty_write_strobe <= 1'd1;
         end
         else if(reg_addr_i==8'h08) clear_to_eol_strobe <= 1'd1;
         else if(reg_addr_i==8'h09) clear_screen_strobe <= 1'd1;
-        else if(reg_addr_i==8'h0a) tty_enabled = data_i[0];
+        else if(reg_addr_i==8'h0a) tty_enabled = data_i_delay[0];
+        else if(reg_addr_i==8'h0b) scroll_enabled = data_i_delay[0];
         else
         begin
             scroll_up <= 1'd0;
@@ -281,7 +291,7 @@ wire        tty_busy;
 
 assign tty_busy = (tty_state != IDLE);
 
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_vid_i or negedge rst_n_i)
 begin
     if(rst_n_i == 1'b0)
     begin
@@ -331,7 +341,8 @@ begin
                     else
                     begin
                         cursor_y <= cursor_y;
-                        tty_scroll <= 1'd1;
+                        if(scroll_enabled) tty_scroll <= 1'd1;
+                        else tty_scroll <= 1'd0;
                         return_state <= IDLE;
                         tty_state <= CLEAR_TO_EOL_INIT;
                     end
@@ -355,7 +366,7 @@ begin
                         tty_state <= IDLE;
                         tty_scroll <= 1'd0;
                     end
-                    else
+                    else if(scroll_enabled)
                     begin
                         cursor_x <= 7'd0;
                         if(cursor_y < 5'd29) 
@@ -495,10 +506,11 @@ assign scroll_line = (line + start_y) % LINES;
 //assign char = char_y+char_x;
 assign charbuf_addr = {scroll_y, 4'd0}+{scroll_y, 6'd0}+char_x;  // Y*80 + X
 assign charbuf_waddr = {scroll_line, 4'd0}+{scroll_line, 6'd0}+reg_addr_i[6:0];
+assign charbuf_xaddr = {scroll_line, 4'd0}+{scroll_line, 6'd0}+reg_addr_r_i[6:0];
 //assign tty_waddr = {(cursor_y+start_y) % LINES, 4'd0}+{(cursor_y+start_y) % LINES, 6'd0}+cursor_x;
 assign charbuf_raddr = tty_we ? tty_waddr : charbuf_addr;
 
-always @(posedge clk_i)
+always @(posedge clk_vid_i)
     char_x_delay <= char_x;
 
 // Character buffer - PORT A connects to CPU, PORT B connector to character generator
@@ -509,13 +521,13 @@ charbuf_dpram charbuf(
         .ocea(1'b1), //input ocea
         .cea(1'b1), //input cea
         .reseta(1'b0), //input reseta
-        .wrea(~R_W_n && video_cs && reg_addr_i[7] && (reg_addr_i[6:0] < 80)), //input wrea
-        .clkb(clk_i), //input clkb
+        .wrea(~R_W_n && video_cs && reg_addr_i[7]),// && (reg_addr_i[6:0] < 80)), //input wrea
+        .clkb(clk_vid_i), //input clkb
         .oceb(1'b1), //input oceb
         .ceb(1'b1), //input ceb
         .resetb(1'b0), //input resetb
         .wreb(tty_we), //input wreb
-        .ada(charbuf_waddr), //input [11:0] ada
+        .ada(/*R_W_n ? charbuf_xaddr :*/ charbuf_waddr), //input [11:0] ada
         .dina(data_i_delay), //input [7:0] dina
         .adb(charbuf_raddr), //input [11:0] adb
         .dinb(tty_wdata) //input [7:0] dinb
@@ -545,7 +557,7 @@ fontrom fontrom_inst(
 
 DVI_TX_Top dvi_tx(
 		.I_rst_n(rst_n_i), //input I_rst_n
-		.I_rgb_clk(clk_i), //input I_rgb_clk
+		.I_rgb_clk(clk_vid_i), //input I_rgb_clk
 		.I_rgb_vs(dvi_vs), //input I_rgb_vs
 		.I_rgb_hs(dvi_hs), //input I_rgb_hs
 		.I_rgb_de(dvi_de), //input I_rgb_de

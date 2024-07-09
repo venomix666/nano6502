@@ -98,6 +98,7 @@ wire            timer_cs;
 wire    [7:0]   timer_data_o;
 
 wire    WE;
+wire    cpu_clk;
 
 assign rst_n = ~rst_i;
 assign rst_p = rst_i;
@@ -231,9 +232,11 @@ sd_interface sd_inst(
 
 video video_inst(
     .clk_i(clk_i),
+    .clk_vid_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
     .reg_addr_i(cpu_addr_w[7:0]),
+    .reg_addr_r_i(cpu_addr[7:0]),
     .data_i(cpu_data_o),
     .video_cs(video_cs),
     .data_o(video_data_o),

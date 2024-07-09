@@ -150,7 +150,7 @@ end
 
 assign data_o = data_o_reg;
 
-sd_rw #(.CLK_DIV(2), .SIMULATE(0)) sd_rw_inst(
+sd_rw #(.CLK_DIV(3), .SIMULATE(0)) sd_rw_inst(
         .rstn(rst_n_i),
         .clk(clk_i),
         .sdclk(sdclk),

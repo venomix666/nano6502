@@ -35,11 +35,8 @@ reg [7:0]   data_o_reg;
 
 reg [1:0]   timer_state;
 
-always @(posedge clk_i or negedge rst_n_i)
+always @(*)
 begin
-    if(rst_n_i == 1'b0) data_o_reg <= 8'd0;
-    else
-    begin
         case(reg_addr_i)
             2'b00: data_o_reg = {7'd0, timer_idle};
             2'b01: data_o_reg = 8'd0;
@@ -47,7 +44,6 @@ begin
             2'b11: data_o_reg = cs_set[15:8];
             default: data_o_reg = 8'd0;
         endcase
-    end
 end
 
 assign data_o = data_o_reg;
