@@ -5,12 +5,13 @@
 // 01       Timer start strobe
 // 02       Timer centiseconds LSB
 // 03       Times centiseconds MSB
+// 04       Reset timer to idle strobe
 
 module timer(
 	input               clk_i,
 	input               rst_n_i,
     input               R_W_n,
-	input   [1:0]       reg_addr_i,
+	input   [2:0]       reg_addr_i,
     input   [7:0]       data_i,
     input               timer_cs,
     output  [7:0]       data_o
@@ -30,6 +31,7 @@ reg [15:0]  cs_set;
 
 reg         timer_idle;
 reg         timer_start;
+reg         timer_cancel;
 
 reg [7:0]   data_o_reg;
 
@@ -38,10 +40,10 @@ reg [1:0]   timer_state;
 always @(*)
 begin
         case(reg_addr_i)
-            2'b00: data_o_reg = {7'd0, timer_idle};
-            2'b01: data_o_reg = 8'd0;
-            2'b10: data_o_reg = cs_set[7:0];
-            2'b11: data_o_reg = cs_set[15:8];
+            3'b000: data_o_reg = {7'd0, timer_idle};
+            3'b001: data_o_reg = 8'd0;
+            3'b010: data_o_reg = cs_set[7:0];
+            3'b011: data_o_reg = cs_set[15:8];
             default: data_o_reg = 8'd0;
         endcase
 end
@@ -54,23 +56,34 @@ begin
     begin
         cs_set <= 16'd0;
         timer_start <= 1'd0;
+        timer_cancel <= 1'd0;
     end
     else if((timer_cs) && (!R_W_n))
     begin
         case(reg_addr_i)
-            2'b01:
+            3'b001:
             begin
-                timer_start <= 1'd1;             
+                timer_start <= 1'd1; 
+                timer_cancel <= 1'd0;
             end
-            2'b10:
+            3'b010:
             begin
                 cs_set[7:0] <= data_i;
             end
-            2'b11:
+            3'b011:
             begin
                 cs_set[15:8] <= data_i;
             end
-            default: timer_start <= 1'd0;
+            3'b100:
+            begin
+                timer_start <= 1'd0;
+                timer_cancel <= 1'd1;
+            end
+            default: 
+            begin
+                timer_start <= 1'd0;
+                timer_cancel <= 1'd0;
+            end
         endcase
     end
     else
@@ -108,7 +121,7 @@ begin
                 end
                 else ms_cnt <= ms_cnt + 1;
 
-                if(cs_cnt == 19'd0) timer_state <= IDLE;
+                if(cs_cnt == 19'd0 || timer_cancel) timer_state <= IDLE;
                 else timer_state <= RUNNING;
 
             end

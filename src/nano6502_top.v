@@ -250,7 +250,7 @@ timer timer_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
-    .reg_addr_i(cpu_addr_w[1:0]),
+    .reg_addr_i(cpu_addr_w[2:0]),
     .data_i(cpu_data_o),
     .timer_cs(timer_cs),
     .data_o(timer_data_o)    

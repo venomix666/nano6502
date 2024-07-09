@@ -75,6 +75,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe01: Timer start strobe  
 0xfe02: Timer time in centiseconds LSB  
 0xfe03: Timer time in centiseconds MSB  
+0xfe04: Timer reset strobe  
 
 ### Known bugs
 * Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
