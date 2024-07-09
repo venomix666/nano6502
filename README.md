@@ -20,8 +20,8 @@ A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just a
 In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
 * Open a serial terminal connection to the board
 * Press Ctrl+x, Ctrl+c, enter
-* Enter the command: pll_clk O0=25175K -s
-* Enter the command: reboot
+* Enter the command: `pll_clk O0=25175K -s`
+* Enter the command: `reboot`
 
 ### Program the FPGA
 If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/blob/main/impl/pnr/nano6502.fs) and program it the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
