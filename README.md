@@ -14,13 +14,17 @@ Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175
 A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
 ![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
 
+## Gettings started
 
-## Set up PLL
+### Set up PLL
 In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
 * Open a serial terminal connection to the board
 * Press Ctrl+x, Ctrl+c, enter
 * Enter the command: pll_clk O0=25175K -s
 * Enter the command: reboot
+
+### Program the FPGA
+
 
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
