@@ -11,17 +11,23 @@ Planned features for the first version are:
 
 Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
 
-A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
+A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 15x1 MB partitions on the SD-card. 
 ![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
 
+## Gettings started
 
-## Set up PLL
+### Set up PLL
 In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
 * Open a serial terminal connection to the board
 * Press Ctrl+x, Ctrl+c, enter
-* Enter the command: pll_clk O0=25175K -s
-* Enter the command: reboot
+* Enter the command: `pll_clk O0=25175K -s`
+* Enter the command: `reboot`
 
+### Program the FPGA
+If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/blob/main/impl/pnr/nano6502.fs) and program it the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
+```console
+openFPGAloader -b tangnano20k -f ./nano6502.fs
+```
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
@@ -29,6 +35,8 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0x01: UART on IO page.  
 0x02: LED control on IO page.  
 0x03: SD card control on IO page.  
+0x04: Video control IO page.  
+0x05: Timer IO page.  
     
 ### UART registers   
 0xfe00:  TX data - write to initiate transmission  
@@ -90,4 +98,6 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 Some parts in this project are reused from other projects:  
 The 6502 Core used is [Arlet's 6502 core](https://github.com/Arlet/verilog-6502) with [65C02 instruction extension](https://github.com/hoglet67/verilog-6502)   
 The low-level SD-card state-machine is reused from [MiSTeryNano](https://github.com/harbaum/MiSTeryNano/)  
+The font used is from this [romfont](https://github.com/spacerace/romfont) repository  
+
 
