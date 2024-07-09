@@ -37,13 +37,13 @@ reg [1:0]   timer_state;
 
 always @(*)
 begin
-    case(reg_addr_i)
-        2'b00: data_o_reg = {7'd0, timer_idle};
-        2'b01: data_o_reg = 8'd0;
-        2'b10: data_o_reg = cs_set[7:0];
-        2'b11: data_o_reg = cs_set[15:8];
-        default: data_o_reg = 8'd0;
-    endcase
+        case(reg_addr_i)
+            2'b00: data_o_reg = {7'd0, timer_idle};
+            2'b01: data_o_reg = 8'd0;
+            2'b10: data_o_reg = cs_set[7:0];
+            2'b11: data_o_reg = cs_set[15:8];
+            default: data_o_reg = 8'd0;
+        endcase
 end
 
 assign data_o = data_o_reg;

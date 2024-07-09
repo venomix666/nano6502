@@ -5,5 +5,5 @@ module fontrom(clk, adr, data);
 	reg [7:0] data; 
 	reg [7:0] mem [2048];
 	initial $readmemh("fontrom.hex", mem);
-	always @(negedge clk) data <= mem[adr];
+	always @(posedge clk) data <= mem[adr];
 endmodule

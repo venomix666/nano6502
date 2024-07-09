@@ -64,8 +64,10 @@ wire    [7:0]   cpu_data_o;
 wire    [7:0]   ram_data_o;
 wire    [7:0]   uart_data_o;
 wire    [15:0]  cpu_addr;
+reg     [15:0]  cpu_addr_w;
+
 wire    [7:0]   addr_top;
-wire            R_W_n;   
+reg             R_W_n;   
 wire            rst_n;  // Active high reset signal
 wire            rst_p;
 
@@ -95,6 +97,9 @@ wire    [7:0]   video_data_o;
 wire            timer_cs;
 wire    [7:0]   timer_data_o;
 
+wire    WE;
+wire    cpu_clk;
+
 assign rst_n = ~rst_i;
 assign rst_p = rst_i;
 
@@ -108,6 +113,7 @@ assign leds[0] = ~ledwire[0];
 instram main_ram(
     .clk(clk_i),
     .adr(cpu_addr),
+    .adr_w(cpu_addr_w),
     .rwn(R_W_n),
     .cs(ram_cs),
     .data_i(cpu_data_o),
@@ -116,8 +122,9 @@ instram main_ram(
 addr_decoder addr_dec(
         .clk_i(clk_i),
         .rst_n_i(rst_n),
-        .R_W_n(R_W_n),
+        .R_W_n(~WE),
         .addr_i(cpu_addr),
+        .addr_w_i(cpu_addr_w),
         .data_i(cpu_data_o),
         .data_o(addr_dec_data_o),
         .ram_cs(ram_cs),
@@ -131,7 +138,7 @@ addr_decoder addr_dec(
         .timer_cs(timer_cs)
 );
 
-T65 CPU(
+/*T65 CPU(
         .Mode(2'b01),       // 65C02
         .BCD_en(1'b1),      // "others"?
         .Res_n(rst_n),
@@ -157,11 +164,11 @@ T65 CPU(
         .Regs(),
         .DEBUG(),
         .NMI_ack()
-);
+);*/
 
-//wire    WE;
 
-/*cpu_65c02 cpuinst(
+
+cpu_65c02 cpuinst(
         .clk(clk_i),
         .reset(rst_p),
         .AB(cpu_addr),
@@ -172,10 +179,13 @@ T65 CPU(
         .NMI(1'b0), 
         .RDY(1'b1),
         .SYNC()
-);*/
+);
 
-//assign R_W_n = ~WE;
-
+always @(posedge clk_i)
+begin
+        R_W_n <= ~WE;
+        cpu_addr_w <= cpu_addr;
+end
 uart uart_inst(
         .clk(clk_i),
         .rst_n(rst_n),
@@ -183,7 +193,7 @@ uart uart_inst(
         .uart_rx(uart_rx_i),
         .uart_cs(uart_cs),
         .R_W_n(R_W_n),
-        .reg_addr(cpu_addr[1:0]),
+        .reg_addr(cpu_addr_w[1:0]),
         .data_o(uart_data_o),
         .uart_tx(uart_tx_o)
 );
@@ -198,7 +208,7 @@ leds led_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
-    .reg_addr_i(cpu_addr[1:0]),
+    .reg_addr_i(cpu_addr_w[1:0]),
     .data_i(cpu_data_o),
     .led_cs(led_cs),
     .data_o(led_data_o),
@@ -210,7 +220,8 @@ sd_interface sd_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
-    .reg_addr_i(cpu_addr[7:0]),
+    .reg_addr_i(cpu_addr_w[7:0]),
+    .reg_addr_r_i(cpu_addr[7:0]),
     .data_i(cpu_data_o),
     .sd_cs(sd_cs),
     .data_o(sd_data_o),
@@ -221,9 +232,11 @@ sd_interface sd_inst(
 
 video video_inst(
     .clk_i(clk_i),
+    .clk_vid_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
-    .reg_addr_i(cpu_addr[7:0]),
+    .reg_addr_i(cpu_addr_w[7:0]),
+    .reg_addr_r_i(cpu_addr[7:0]),
     .data_i(cpu_data_o),
     .video_cs(video_cs),
     .data_o(video_data_o),
@@ -237,22 +250,22 @@ timer timer_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
     .R_W_n(R_W_n),
-    .reg_addr_i(cpu_addr[1:0]),
+    .reg_addr_i(cpu_addr_w[1:0]),
     .data_i(cpu_data_o),
     .timer_cs(timer_cs),
     .data_o(timer_data_o)    
 );
 
 always @(*) begin
-    if(rom_cs == 1'b1) cpu_data_i <= rom_data_o;
-    else if(sd_cs == 1'b1) cpu_data_i <= sd_data_o;
-    else if(ram_cs == 1'b1) cpu_data_i <= ram_data_o;
-    else if(uart_cs == 1'b1) cpu_data_i <= uart_data_o;
-    else if(addr_dec_cs == 1'b1) cpu_data_i <= addr_dec_data_o;
-    else if(led_cs == 1'b1) cpu_data_i <= led_data_o;
-    else if(video_cs == 1'b1) cpu_data_i <= video_data_o;
-    else if(timer_cs == 1'b1) cpu_data_i <= timer_data_o;
-    else cpu_data_i <= 8'd0;//cpu_data_o;
+    if(rom_cs == 1'b1) cpu_data_i = rom_data_o;
+    else if(sd_cs == 1'b1) cpu_data_i = sd_data_o;
+    else if(ram_cs == 1'b1) cpu_data_i = ram_data_o;
+    else if(uart_cs == 1'b1) cpu_data_i = uart_data_o;
+    else if(addr_dec_cs == 1'b1) cpu_data_i = addr_dec_data_o;
+    else if(led_cs == 1'b1) cpu_data_i = led_data_o;
+    else if(video_cs == 1'b1) cpu_data_i = video_data_o;
+    else if(timer_cs == 1'b1) cpu_data_i = timer_data_o;
+    else cpu_data_i = cpu_data_o;
 end
 
 endmodule

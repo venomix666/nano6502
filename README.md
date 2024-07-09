@@ -9,6 +9,8 @@ Planned features for the first version are:
 * 80-column text mode HDMI video output, 640x480 60 Hz (implemented)
 * USB keyboard support (not implemented yet)
 
+Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
+
 A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 16x1 MB partitions on the SD-card. The port is not yet submitted to the main repoistory but currently exists as a branch in my fork of the project.
 ![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
 
@@ -40,7 +42,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe02:  WS2812 Green - On board RGB led is automatically updated on write  
 0xfe03:  WS2812 Blue - On board RGB led is automatically updated on write  
   
-### SD-card:
+### SD-card registers
 0xfe00:  SD card sector address (LSB)  
 0xfe01:  SD card sector address  
 0xfe02:  SD card sector address  
@@ -53,7 +55,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe09:  SD card type (debug only)  
 0xfe80 - 0xfeff: 128 byte data page, paged by the page register so that all 512 bytes can be accessed  
 
-### Video/TTY:
+### Video/TTY registers
 0xfe00:  Active line - selects which line in memory that is available at 0xfe80  
 0xfe01:  Cursor X position  
 0xfe02:  Cursor Y position  
@@ -65,10 +67,20 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe08:  Clear to end-of-line strobe  
 0xfe09:  Clear screen strobe  
 0xfe0a:  TTY enabled  
-0xfe80 - 0xfeff: Active line data, for direct access  
+0xfe0b:  Scrolling enabled  
+0xfe80 - 0xfeff: Active line data, for direct access
+
+### Timer registers
+0xfe00: Timer idle - 1 when idle, 0 when busy  
+0xfe01: Timer start strobe  
+0xfe02: Timer time in centiseconds LSB  
+0xfe03: Timer time in centiseconds MSB  
+
+### Known bugs
+* Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
 
 ### Credits
 Some parts in this project are reused from other projects:  
-The T65 core in Verilog is reused from [NESTang](https://github.com/nand2mario/nestang/)  
+The 6502 Core used is [Arlet's 6502 core](https://github.com/Arlet/verilog-6502) with [65C02 instruction extension](https://github.com/hoglet67/verilog-6502)   
 The low-level SD-card state-machine is reused from [MiSTeryNano](https://github.com/harbaum/MiSTeryNano/)  
 

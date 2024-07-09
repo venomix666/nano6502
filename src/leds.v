@@ -67,19 +67,19 @@ begin
     else if((led_cs) && (reg_addr_i == 2'b01) && (!R_W_n))
     begin
         //WS2812_data[15:8] = data_i;
-        r_reg = data_i;
+        r_reg <= data_i;
         ws2812_start <= 1'b1;
     end
     else if((led_cs) && (reg_addr_i == 2'b10) && (!R_W_n))
     begin
         //WS2812_data[7:0] = data_i;
-        g_reg = data_i;
+        g_reg <= data_i;
         ws2812_start <= 1'b1;
     end
     else if((led_cs) && (reg_addr_i == 2'b11) && (!R_W_n))
     begin
         //WS2812_data[23:16] = data_i;
-        b_reg = data_i;
+        b_reg <= data_i;
         ws2812_start <= 1'b1;
     end
     else
@@ -96,11 +96,11 @@ assign WS2812_data = {b_reg[0], b_reg[1], b_reg[2], b_reg[3], b_reg[4], b_reg[5]
 always @(*)
 begin
     case(reg_addr_i)
-        2'b00: data_o_reg = led_reg;
-        2'b01: data_o_reg = r_reg;
-        2'b10: data_o_reg = g_reg;
-        2'b11: data_o_reg = b_reg;
-        default: data_o_reg = 8'd0;
+        2'b00: data_o_reg <= led_reg;
+        2'b01: data_o_reg <= r_reg;
+        2'b10: data_o_reg <= g_reg;
+        2'b11: data_o_reg <= b_reg;
+        default: data_o_reg <= 8'd0;
     endcase
 end
 
