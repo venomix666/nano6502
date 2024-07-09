@@ -76,6 +76,9 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe02: Timer time in centiseconds LSB  
 0xfe03: Timer time in centiseconds MSB  
 
+### Known bugs
+* Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
+
 ### Credits
 Some parts in this project are reused from other projects:  
 The 6502 Core used is [Arlet's 6502 core](https://github.com/Arlet/verilog-6502) with [65C02 instruction extension](https://github.com/hoglet67/verilog-6502)   
