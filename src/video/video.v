@@ -15,6 +15,12 @@
 // 09       - Clear screen strobe
 // 0A       - tty output enabled
 // 0B       - Autoscroll and line change enabled
+// 10       - FG Red
+// 11       - FG Green
+// 12       - FG Blue
+// 13       - BG Red
+// 14       - BG Green
+// 15       - BG Blue
 // 80-CF    - Line data
 
 // 640x480 info:
@@ -192,6 +198,14 @@ reg             tty_enabled;
 reg             scroll_enabled;
 wire            cursor_active;
 
+reg     [7:0]   fg_r;
+reg     [7:0]   fg_g;
+reg     [7:0]   fg_b;
+reg     [7:0]   bg_r;
+reg     [7:0]   bg_g;
+reg     [7:0]   bg_b;
+
+
 always @(posedge clk_i) data_i_delay <= data_i;
 always @(posedge clk_i) data_i_d_delay <= data_i_delay;
 
@@ -204,6 +218,12 @@ begin
     else if(reg_addr_i == 8'h07) data_o_reg <= {7'd0, tty_busy};
     else if(reg_addr_i == 8'h0a) data_o_reg <= {7'd0, tty_enabled};
     else if(reg_addr_i == 8'h0b) data_o_reg <= {7'd0, scroll_enabled};
+    else if(reg_addr_i == 8'h10) data_o_reg <= fg_r;
+    else if(reg_addr_i == 8'h11) data_o_reg <= fg_g;
+    else if(reg_addr_i == 8'h12) data_o_reg <= fg_b;
+    else if(reg_addr_i == 8'h13) data_o_reg <= bg_r;
+    else if(reg_addr_i == 8'h14) data_o_reg <= bg_g;
+    else if(reg_addr_i == 8'h15) data_o_reg <= bg_b;
     else if(reg_addr_i[7] && (reg_addr_i[6:0] < 80)) data_o_reg <= charbuf_data_o;
     else data_o_reg <= 8'd0;
 end
@@ -226,6 +246,12 @@ begin
         clear_screen_strobe <= 1'd1;
         tty_enabled <= 1'd1;
         scroll_enabled <= 1'd1;
+        fg_r <= 8'h80;
+        fg_g <= 8'h80;
+        fg_b <= 8'h80;
+        bg_r <= 8'h00;
+        bg_g <= 8'h00;
+        bg_b <= 8'h00;
     end
     else if(!R_W_n && video_cs)
     begin
@@ -252,6 +278,12 @@ begin
         else if(reg_addr_i==8'h09) clear_screen_strobe <= 1'd1;
         else if(reg_addr_i==8'h0a) tty_enabled = data_i_delay[0];
         else if(reg_addr_i==8'h0b) scroll_enabled = data_i_delay[0];
+        else if(reg_addr_i==8'h10) fg_r = data_i_delay;
+        else if(reg_addr_i==8'h11) fg_g = data_i_delay;
+        else if(reg_addr_i==8'h12) fg_b = data_i_delay;
+        else if(reg_addr_i==8'h13) bg_r = data_i_delay;
+        else if(reg_addr_i==8'h14) bg_g = data_i_delay;
+        else if(reg_addr_i==8'h15) bg_b = data_i_delay;
         else
         begin
             scroll_up <= 1'd0;
@@ -561,9 +593,9 @@ DVI_TX_Top dvi_tx(
 		.I_rgb_vs(dvi_vs), //input I_rgb_vs
 		.I_rgb_hs(dvi_hs), //input I_rgb_hs
 		.I_rgb_de(dvi_de), //input I_rgb_de
-		.I_rgb_r({font_out, 7'd0}), //input [7:0] I_rgb_r
-		.I_rgb_g({font_out, 7'd0}), //input [7:0] I_rgb_g
-		.I_rgb_b({font_out, 7'd0}), //input [7:0] I_rgb_b
+		.I_rgb_r(font_out ? fg_r : bg_r), //input [7:0] I_rgb_r {font_out, 7'd0}
+		.I_rgb_g(font_out ? fg_g : bg_g), //input [7:0] I_rgb_g
+		.I_rgb_b(font_out ? fg_b : bg_b), //input [7:0] I_rgb_b
 		.O_tmds_clk_p(tmds_clk_p_o), //output O_tmds_clk_p
 		.O_tmds_clk_n(tmds_clk_n_o), //output O_tmds_clk_n
 		.O_tmds_data_p(tmds_data_p_o), //output [2:0] O_tmds_data_p

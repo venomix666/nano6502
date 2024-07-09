@@ -68,6 +68,12 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe09:  Clear screen strobe  
 0xfe0a:  TTY enabled  
 0xfe0b:  Scrolling enabled  
+0xfe10:  Foreground Red  
+0xfe11:  Foreground Green  
+0xfe12:  Foreground Blue  
+0xfe13:  Background Red  
+0xfe14:  Background Green  
+0xfe15:  Background Blue  
 0xfe80 - 0xfeff: Active line data, for direct access
 
 ### Timer registers
