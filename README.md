@@ -24,8 +24,10 @@ In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz
 * Enter the command: reboot
 
 ### Program the FPGA
-
-
+If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/blob/main/impl/pnr/nano6502.fs) and program it the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
+```console
+openFPGAloader -b tangnano20k -f ./nano6502.fs
+```
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
@@ -33,6 +35,8 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0x01: UART on IO page.  
 0x02: LED control on IO page.  
 0x03: SD card control on IO page.  
+0x04: Video control IO page.  
+0x05: Timer IO page.  
     
 ### UART registers   
 0xfe00:  TX data - write to initiate transmission  
