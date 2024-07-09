@@ -24,7 +24,7 @@ In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz
 * Enter the command: `reboot`
 
 ### Program the FPGA
-If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/download/v0.1.0/nano6502.fs) and program it the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
+If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/download/v0.1.0/nano6502.fs) and program it to the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
 ```console
 openFPGAloader -b tangnano20k -f ./nano6502.fs
 ```
