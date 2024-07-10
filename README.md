@@ -14,6 +14,8 @@ Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175
 A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 15x1 MB partitions on the SD-card. 
 ![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
 
+A carrier board is currently being designed, see the [nanoComp](https://github.com/venomix666/nanoComp/) repository for details.
+
 ## Gettings started
 
 ### Set up PLL
