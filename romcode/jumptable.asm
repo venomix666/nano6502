@@ -8,7 +8,7 @@ jmp_inp:        jmp UART_Scan
 ; 0xE009
 jmp_out:        jmp UART_Output
 ; 0xE00C
-jmp_sdload:     jmp SD_load
+;jmp_sdload:     jmp SD_load
 ; 0xE00F    
 ; 0xE012
 ; 0xE015

@@ -20,13 +20,13 @@ cmd_crc = sdcard_param + 5
 IO_page_reg = $00
 IO_page_sdcard = $03
 
-;sd_base = $fe00
+sd_base = $fe00
 sd_addr_0 = $fe00
 sd_addr_1 = $fe01
 sd_addr_2 = $fe02
 sd_addr_3 = $fe03
-;sd_busy = $fe04
-;sd_read_strobe = $fe05
+sd_busy = $fe04
+sd_read_strobe = $fe05
 sd_write_strobe = $fe06
 sd_page = $fe07
 sd_data = $fe80

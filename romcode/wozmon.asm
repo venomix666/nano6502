@@ -15,8 +15,8 @@ CRCCHECK: .res 1
 
 .globalzp MSGL, MSGH
 
-.segment "WOZMON"
-
+;.segment "WOZMON"
+.code
 IN          = $0200          ;*Input buffer
 ;XAML        = $24            ;*Index pointers
 ;XAMH        = $25
@@ -39,7 +39,7 @@ RESET:      CLD             ;Clear decimal arithmetic mode.
 	    ldx #$FF
 	    txs
 MONSTART:
-            jsr boot
+            ;jsr boot
             lda #$11
             sta $03
             LDA #$0D
