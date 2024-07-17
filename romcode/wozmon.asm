@@ -1,19 +1,38 @@
+.ZEROPAGE
+XAML: .res 1
+XAMH: .res 1
+STL: .res 1
+STH: .res 1
+L: .res 1
+H: .res 1
+YSAV: .res 1
+MODE: .res 1
+MSGL: .res 1
+MSGH: .res 1
+COUNTER: .res 1
+CRC: .res 1
+CRCCHECK: .res 1
+
+.globalzp MSGL, MSGH
+
 .segment "WOZMON"
 
 IN          = $0200          ;*Input buffer
-XAML        = $24            ;*Index pointers
-XAMH        = $25
-STL         = $26
-STH         = $27
-L           = $28
-H           = $29
-YSAV        = $2A
-MODE        = $2B
-MSGL        = $2C
-MSGH        = $2D
-COUNTER     = $2E
-CRC         = $2F
-CRCCHECK    = $30
+;XAML        = $24            ;*Index pointers
+;XAMH        = $25
+;STL         = $26
+;STH         = $27
+;L           = $28
+;H           = $29
+;YSAV        = $2A
+;MODE        = $2B
+;MSGL        = $2C
+;MSGH        = $2D
+;COUNTER     = $2E
+;CRC         = $2F
+;CRCCHECK    = $30
+
+
 
 RESET:      CLD             ;Clear decimal arithmetic mode.
             CLI

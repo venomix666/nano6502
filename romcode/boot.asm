@@ -1,6 +1,7 @@
 jmp_addr_l = $50
 jmp_addr_h = $51
 
+
 boot:
     lda #<bootstring
     sta MSGL
