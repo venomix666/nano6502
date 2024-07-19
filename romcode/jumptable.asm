@@ -1,4 +1,4 @@
-.segment "JUMPTBL"
+;.segment "JUMPTBL"
 ; 0xE000
 jmp_mon:        jmp RESET
 ; 0xE003

@@ -8,10 +8,10 @@ fat32_ptr2: .res 2
 
 .globalzp fat32_bufptr, fat32_lfn_bufptr, fat32_ptr, fat32_ptr2 
 
-.segment "JUMPTBL"
+.segment "CODE"
 .include "jumptable.asm"
 
-.segment "CODE"
+;.segment "CODE"
 .include "uart.asm"
 ;.include "sdload.asm"
 ;.include "boot.asm"
