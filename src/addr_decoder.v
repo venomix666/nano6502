@@ -21,7 +21,8 @@ module addr_decoder(
     output              led_cs,
     output              sd_cs,
     output              video_cs,
-    output              timer_cs
+    output              timer_cs,
+    output              usb_cs
 );
 
 reg     [7:0]       io_bank_l;
@@ -35,6 +36,7 @@ reg                 led_cs_reg;
 reg                 sd_cs_reg;
 reg                 video_cs_reg;
 reg                 timer_cs_reg;
+reg                 usb_cs_reg;
 reg                 addr_dec_cs_reg;
 reg     [7:0]       dummy_reg;
 
@@ -69,6 +71,7 @@ always @(*) begin
         sd_cs_reg = 1'b0;
         video_cs_reg = 1'b0;
         timer_cs_reg = 1'b0;
+        usb_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
     else if(addr_w_i == 16'h0001) 
@@ -81,6 +84,7 @@ always @(*) begin
         sd_cs_reg = 1'b0;
         video_cs_reg = 1'b0;
         timer_cs_reg = 1'b0;
+        usb_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
     else if(addr_w_i == 16'h0002)
@@ -93,6 +97,7 @@ always @(*) begin
         sd_cs_reg = 1'b0;
         video_cs_reg = 1'b0;
         timer_cs_reg = 1'b0;
+        usb_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
     else if((addr_w_i >= 16'hfe00) && (addr_w_i < 16'hff00))
@@ -108,6 +113,7 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
             8'h01:
@@ -120,6 +126,7 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
             8'h02:
@@ -132,6 +139,7 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
             8'h03:
@@ -144,6 +152,7 @@ always @(*) begin
                 sd_cs_reg = 1'b1;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
             8'h04:
@@ -156,6 +165,7 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b1;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
             8'h05:
@@ -168,6 +178,20 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b1;
+                usb_cs_reg = 1'b0;
+                addr_dec_cs_reg = 1'b0;
+            end
+            8'h06:
+            begin
+                data_o_reg = 8'd0;
+                uart_cs_reg = 1'b0;
+                ram_cs_reg = 1'b0;
+                rom_cs_reg = 1'b0;
+                led_cs_reg = 1'b0;
+                sd_cs_reg = 1'b0;
+                video_cs_reg = 1'b0;
+                timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b1;
                 addr_dec_cs_reg = 1'b0;
             end
             default:
@@ -180,6 +204,7 @@ always @(*) begin
                 sd_cs_reg = 1'b0;
                 video_cs_reg = 1'b0;
                 timer_cs_reg = 1'b0;
+                usb_cs_reg = 1'b0;
                 addr_dec_cs_reg = 1'b0;
             end
         endcase
@@ -195,6 +220,7 @@ always @(*) begin
         sd_cs_reg = 1'b0;
         video_cs_reg = 1'b0;
         timer_cs_reg = 1'b0;
+        usb_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b0;
     end
     else
@@ -207,6 +233,7 @@ always @(*) begin
         sd_cs_reg = 1'b0;
         video_cs_reg = 1'b0;
         timer_cs_reg = 1'b0;
+        usb_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b0;
     end
 end
@@ -220,6 +247,7 @@ assign led_cs = led_cs_reg;
 assign sd_cs = sd_cs_reg;
 assign video_cs = video_cs_reg;
 assign timer_cs = timer_cs_reg;
+assign usb_cs = usb_cs_reg;
 
 
 // Write enable generation
