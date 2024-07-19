@@ -100,6 +100,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 Some parts in this project are reused from other projects:  
 The 6502 Core used is [Arlet's 6502 core](https://github.com/Arlet/verilog-6502) with [65C02 instruction extension](https://github.com/hoglet67/verilog-6502)   
 The low-level SD-card state-machine is reused from [MiSTeryNano](https://github.com/harbaum/MiSTeryNano/)  
+The USB HID host core was made by [nand2mario](https://github.com/nand2mario/usb_hid_host/)  
 The font used is from this [romfont](https://github.com/spacerace/romfont) repository  
 
 
