@@ -1,20 +1,18 @@
 # nano6502
 nano6502 is a 6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).
 
-Planned features for the first version are:  
+Current features:
 * 64 k RAM (currently implemented with block RAM)
 * 8k ROM which can be switched out (also block RAM)
-* UART (implemented)
-* SD card storage (implemented)
-* 80-column text mode HDMI video output, 640x480 60 Hz (implemented)
-* USB keyboard support (not implemented yet)
+* UART (on built in USB-C connector for now)
+* SD card storage 
+* 80-column text mode HDMI video output, 640x480 60 Hz 
+* USB keyboard support (with [nanoComp](https://github.com/venomix666/nanoComp/) carrier board)  
 
 Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
 
 A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just about the only software that exists for this SoC right now. It currently uses the UART for input as the USB keyboard support is not yet implemented but is otherwise fully functional with a SCREEN driver and 15x1 MB partitions on the SD-card. 
 ![nano6502_screenshot](https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55)
-
-A carrier board is currently being designed, see the [nanoComp](https://github.com/venomix666/nanoComp/) repository for details.
 
 ## Gettings started
 
@@ -95,6 +93,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 
 ### Known bugs
 * Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
+* USB keyboard sometimes double triggers on letters, to be fixed...
 
 ### Credits
 Some parts in this project are reused from other projects:  
