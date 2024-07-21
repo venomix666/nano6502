@@ -41,11 +41,14 @@
 // 0x0002 LEDs
 // 0x0003 SD card
 // 0x0004 Video
+// 0x0005 Timer
+// 0x0006 USB HID 1
 
 module nano6502_top
 (
     input           clk_i,
     input           rst_i, //S1
+    input           clk27_i,
     input           uart_rx_i,
     output          uart_tx_o,
     output          leds[5:0],
@@ -56,7 +59,9 @@ module nano6502_top
     output     [2:0]  tmds_data_p   ,//{r,g,b}
     output     [2:0]  tmds_data_n   ,
     inout           sdcmd,
-    inout [3:0]     sddat
+    inout [3:0]     sddat,
+    inout           usb_dp,
+    inout           usb_dm
 );
 
 reg     [7:0]   cpu_data_i;
@@ -97,6 +102,11 @@ wire    [7:0]   video_data_o;
 wire            timer_cs;
 wire    [7:0]   timer_data_o;
 
+wire            usb_cs;
+wire    [7:0]   usb_data_o;
+
+wire    clk_usb;
+
 wire    WE;
 wire    cpu_clk;
 
@@ -135,7 +145,8 @@ addr_decoder addr_dec(
         .led_cs(led_cs),
         .sd_cs(sd_cs),
         .video_cs(video_cs),
-        .timer_cs(timer_cs)
+        .timer_cs(timer_cs),
+        .usb_cs(usb_cs)
 );
 
 /*T65 CPU(
@@ -256,6 +267,25 @@ timer timer_inst(
     .data_o(timer_data_o)    
 );
 
+Gowin_rPLL_USB usbpll(
+        .clkout(clkusb), //output clkout
+        .clkin(clk27_i) //input clkin
+    );
+
+usb_interface usb_interface_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .clkusb_i(clkusb),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr_w[7:0]),
+    .reg_addr_r_i(cpu_addr[7:0]),
+    .data_i(cpu_data_o),
+    .usb_cs(usb_cs),
+    .data_o(usb_data_o),
+    .usb_dp(usb_dp),
+    .usb_dm(usb_dm)
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i = rom_data_o;
     else if(sd_cs == 1'b1) cpu_data_i = sd_data_o;
@@ -265,6 +295,7 @@ always @(*) begin
     else if(led_cs == 1'b1) cpu_data_i = led_data_o;
     else if(video_cs == 1'b1) cpu_data_i = video_data_o;
     else if(timer_cs == 1'b1) cpu_data_i = timer_data_o;
+    else if(usb_cs == 1'b1) cpu_data_i = usb_data_o;
     else cpu_data_i = cpu_data_o;
 end
 

@@ -13,6 +13,7 @@
         <File path="src/charbuf_dpram/charbuf_dpram.v" type="file.verilog" enable="1"/>
         <File path="src/dvi_tx/dvi_tx.v" type="file.verilog" enable="1"/>
         <File path="src/gowin_dpb/sector_dpram.v" type="file.verilog" enable="1"/>
+        <File path="src/gowin_rpll_usb/gowin_rpll_usb.v" type="file.verilog" enable="1"/>
         <File path="src/instram.v" type="file.verilog" enable="1"/>
         <File path="src/leds.v" type="file.verilog" enable="1"/>
         <File path="src/nano6502_top.v" type="file.verilog" enable="1"/>
@@ -20,6 +21,9 @@
         <File path="src/sdcard/sd_rw.v" type="file.verilog" enable="1"/>
         <File path="src/sdcard/sdcmd_ctrl.v" type="file.verilog" enable="1"/>
         <File path="src/timer.v" type="file.verilog" enable="1"/>
+        <File path="src/usb_hid_host/usb_hid_host.v" type="file.verilog" enable="1"/>
+        <File path="src/usb_hid_host/usb_hid_host_rom.v" type="file.verilog" enable="1"/>
+        <File path="src/usb_hid_host/usb_interface.v" type="file.verilog" enable="1"/>
         <File path="src/verilog-6502/ALU.v" type="file.verilog" enable="1"/>
         <File path="src/verilog-6502/cpu_65c02.v" type="file.verilog" enable="1"/>
         <File path="src/video/fontrom.v" type="file.verilog" enable="1"/>
