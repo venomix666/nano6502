@@ -7,10 +7,12 @@ IO_PORT "tmds_data_p[1]" PULL_MODE=NONE DRIVE=8;
 IO_LOC "tmds_data_p[2]" 39,40;
 IO_PORT "tmds_data_p[2]" PULL_MODE=NONE DRIVE=8;
 
-IO_LOC "clk27_i" 4;
-IO_PORT "clk27_i" PULL_MODE=UP;
+//IO_LOC "clk27_i" 4;
+//IO_PORT "clk27_i" PULL_MODE=UP;
 IO_LOC "clk_i" 10;
 IO_PORT "clk_i" PULL_MODE=UP;
+IO_LOC "clkusb_i" 11;
+IO_PORT "clkusb_i" PULL_MODE=UP;
 IO_LOC "rst_i" 87;
 IO_PORT "rst_i" IO_TYPE=LVCMOS33 PULL_MODE=UP;
 IO_LOC "uart_rx_i" 70;

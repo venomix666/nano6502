@@ -48,7 +48,7 @@ module nano6502_top
 (
     input           clk_i,
     input           rst_i, //S1
-    input           clk27_i,
+    input           clkusb_i,
     input           uart_rx_i,
     output          uart_tx_o,
     output          leds[5:0],
@@ -267,15 +267,10 @@ timer timer_inst(
     .data_o(timer_data_o)    
 );
 
-Gowin_rPLL_USB usbpll(
-        .clkout(clkusb), //output clkout
-        .clkin(clk27_i) //input clkin
-    );
-
 usb_interface usb_interface_inst(
     .clk_i(clk_i),
     .rst_n_i(rst_n),
-    .clkusb_i(clkusb),
+    .clkusb_i(clkusb_i),
     .R_W_n(R_W_n),
     .reg_addr_i(cpu_addr_w[7:0]),
     .reg_addr_r_i(cpu_addr[7:0]),

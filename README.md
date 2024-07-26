@@ -17,10 +17,11 @@ A port of [CP/M-65](https://github.com/venomix666/cpm65/tree/nano6502) is just a
 ## Gettings started
 
 ### Set up PLL
-In order to set up the PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock, do the following:
+In order to set up the external PLL on the Tang Nano 20K for generation of the 25.175 MHz video clock and the 12 MHz USB clock, do the following:
 * Open a serial terminal connection to the board
 * Press Ctrl+x, Ctrl+c, enter
 * Enter the command: `pll_clk O0=25175K -s`
+* Enter the command: `pll_clk O1=12M -s`
 * Enter the command: `reboot`
 
 ### Program the FPGA
