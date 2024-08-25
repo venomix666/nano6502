@@ -110,6 +110,7 @@ begin
                 new_key_set <= 1'b1;
             end
             else new_key_set <= 1'b0;
+            key_active[0] <= key1; key_active[1] <= key2;
         end
         2: begin // mouse
             mouse_btn_reg <= mouse_btn;
