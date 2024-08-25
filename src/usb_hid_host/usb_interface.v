@@ -42,10 +42,12 @@ wire                    game_l, game_r, game_u, game_d;
 wire                    game_a, game_b, game_x, game_y, game_sel, game_sta;
 
 
-reg             [7:0]   key_reg, key_old;
-reg                     new_key;
-reg                     key_down;
+reg             [7:0]   key_active[2];
+reg             [7:0]   keydown;
+reg             [7:0]   keyascii;
 reg                     new_key_set;
+reg                     new_key;
+
 reg             [7:0]   mouse_btn_reg;
 reg     signed  [7:0]   mouse_dx_reg, mouse_dy_reg;
 reg             [7:0]   game_dir_reg;
@@ -59,7 +61,7 @@ always @(*)
 begin
     case(reg_addr_i)
         8'h00: data_o_reg = {7'd0, new_key};
-        8'h01: data_o_reg = key_reg;
+        8'h01: data_o_reg = keyascii;
         8'h02: data_o_reg = key_modifiers;
         8'h03: data_o_reg = mouse_btn_reg;
         8'h04: data_o_reg = mouse_dx_reg;
@@ -83,9 +85,10 @@ always @(posedge clkusb_i or negedge rst_n_i)
 begin
     if(rst_n_i == 1'b0)
     begin
-        key_reg <= 8'd0;
-        key_old <= 8'd0;
-        key_down <= 1'd0;
+        keyascii <= 8'd0;
+        key_active[0] <= 8'd0;
+        key_active[1] <= 8'd0;
+
         mouse_btn_reg <= 8'd0;
         mouse_dx_reg <= 8'd0;
         mouse_dy_reg <= 8'd0;
@@ -95,18 +98,29 @@ begin
     end
     else if(report == 1'b1) 
     begin
-        key_old <= key1;
-        if(key1 != key_old && !key_down) begin
-            key_reg <= scancode2char(key1, key_modifiers);
-            new_key_set <= 1'b1;
-            key_down <= 1'b1;
+        case(typ)
+        1: begin // Keyboard
+
+            if (key1 !=0 && key1 != key_active[0] && key1 != key_active[1]) begin
+                keydown <= key1; keyascii <= scancode2char(key1, key_modifiers);
+                new_key_set <= 1'b1;
+            end
+            else if (key2 !=0 && key2 != key_active[0] && key2 != key_active[1]) begin
+                keydown <= key2; keyascii <= scancode2char(key2, key_modifiers);
+                new_key_set <= 1'b1;
+            end
+            else new_key_set <= 1'b0;
         end
-        else key_down <= 1'b0;
-        mouse_btn_reg <= mouse_btn;
-        mouse_dx_reg <= mouse_dx;
-        mouse_dy_reg <= mouse_dy;
-        game_dir_reg <= {4'b0000, game_d, game_u, game_r, game_l};
-        game_btn_reg <= {2'b00, game_sta, game_sel, game_y, game_x, game_b, game_a};
+        2: begin // mouse
+            mouse_btn_reg <= mouse_btn;
+            mouse_dx_reg <= mouse_dx;
+            mouse_dy_reg <= mouse_dy;
+        end
+        3: begin // gamepad
+            game_dir_reg <= {4'b0000, game_d, game_u, game_r, game_l};
+            game_btn_reg <= {2'b00, game_sta, game_sel, game_y, game_x, game_b, game_a};
+        end
+        endcase
     end
     else new_key_set <= 1'b0;
 end
