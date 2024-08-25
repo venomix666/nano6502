@@ -92,6 +92,19 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe03: Timer time in centiseconds MSB  
 0xfe04: Timer reset strobe  
 
+### USB host registers
+0xfe00: New key available - clears on read  
+0xfe01: Keypress ASCII data  
+0xfe02: Key modifier  
+0xfe03: Mouse button  
+0xfe04: Mouse dX  
+0xfe05: Mouse dY  
+0xfe06: Gamepad direction {4'b0000, game_d, game_u, game_r, game_l}  
+0xfe07: Gamepad buttons {2'b00, game_sta, game_sel, game_y, game_x, game_b, game_a}  
+0xfe08: New USB report available - clears on read  
+0xfe09: Device type - 0: no device, 1: keyboard, 2: mouse, 3: gamepad  
+0xfe0a: USB error code  
+
 ### Known bugs
 * Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
 * USB keyboard sometimes double triggers on letters, to be fixed...
