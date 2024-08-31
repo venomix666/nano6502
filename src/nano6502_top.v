@@ -50,7 +50,9 @@ module nano6502_top
     input           rst_i, //S1
     input           clkusb_i,
     input           uart_rx_i,
+    input           uart_b_rx_i,
     output          uart_tx_o,
+    output          uart_b_tx_o,
     output          leds[5:0],
     output          ws2812_o,
     output          sdclk,
@@ -203,10 +205,12 @@ uart uart_inst(
         .data_i(cpu_data_o),
         .uart_rx(uart_rx_i),
         .uart_cs(uart_cs),
+        .uart_b_rx(uart_b_rx_i),
         .R_W_n(R_W_n),
-        .reg_addr(cpu_addr_w[1:0]),
+        .reg_addr(cpu_addr_w[2:0]),
         .data_o(uart_data_o),
-        .uart_tx(uart_tx_o)
+        .uart_tx(uart_tx_o),
+        .uart_b_tx(uart_b_tx_o)
 );
 
 bootrom bootrom_inst(

@@ -19,6 +19,10 @@ IO_LOC "uart_rx_i" 70;
 IO_PORT "uart_rx_i" IO_TYPE=LVCMOS33;
 IO_LOC "uart_tx_o" 69;
 IO_PORT "uart_tx_o" IO_TYPE=LVCMOS33;
+IO_LOC "uart_b_rx_i" 26;
+IO_PORT "uart_b_rx_i" IO_TYPE=LVCMOS33;
+IO_LOC "uart_b_tx_o" 25;
+IO_PORT "uart_b_tx_o" IO_TYPE=LVCMOS33;
 
 // LEDs
 IO_LOC "leds[5]" 20;
