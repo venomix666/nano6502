@@ -42,11 +42,11 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 ### UART registers   
 0xfe00:  TX data UART A - write to initiate transmission  
 0xfe01:  TX ready UART A - UART is ready to accept a new TX byte  
-0xfe02:  RX data UART A 
+0xfe02:  RX data UART A   
 0xfe03:  RX data available UART A - high if a new byte is available in RX data  
 0xfe04:  TX data UART B - write to initiate transmission  
 0xfe05:  TX ready UART B - UART is ready to accept a new TX byte  
-0xfe06:  RX data UART B 
+0xfe06:  RX data UART B  
 0xfe07:  RX data available UART B - high if a new byte is available in RX data  
    
 ### LED registers 
