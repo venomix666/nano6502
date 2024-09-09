@@ -7,7 +7,9 @@
     <FileList>
         <File path="src/UART/uart.v" type="file.verilog" enable="1"/>
         <File path="src/UART/uart_rx.v" type="file.verilog" enable="1"/>
+        <File path="src/UART/uart_rx_flex.v" type="file.verilog" enable="1"/>
         <File path="src/UART/uart_tx.v" type="file.verilog" enable="1"/>
+        <File path="src/UART/uart_tx_flex.v" type="file.verilog" enable="1"/>
         <File path="src/addr_decoder.v" type="file.verilog" enable="1"/>
         <File path="src/bootrom.v" type="file.verilog" enable="1"/>
         <File path="src/charbuf_dpram/charbuf_dpram.v" type="file.verilog" enable="1"/>
