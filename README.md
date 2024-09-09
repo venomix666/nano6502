@@ -48,6 +48,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe05:  TX ready UART B - UART is ready to accept a new TX byte  
 0xfe06:  RX data UART B  
 0xfe07:  RX data available UART B - high if a new byte is available in RX data  
+0xfe08:  Baudrate UART B - 0: 4800, 1: 9600, 2: 19200, 3: 38400, 4: 57600, 5: 115200  
    
 ### LED registers 
 0xfe00:  LEDs - byte 0-6 connected to the on board LEDs  
