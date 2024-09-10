@@ -112,7 +112,6 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 
 ### Known bugs
 * Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
-* USB keyboard sometimes double triggers on letters, to be fixed...
 
 ### Credits
 Some parts in this project are reused from other projects:  
