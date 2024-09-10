@@ -55,6 +55,8 @@ reg             [7:0]   game_btn_reg;
 
 reg             [7:0]   data_o_reg;
 reg                     report_reg;
+reg                     new_key_set_reclocked;
+reg                     new_key_set_reclocked_delay;
 
 // Asynchronous read
 always @(*)
@@ -126,6 +128,22 @@ begin
     else new_key_set <= 1'b0;
 end
 
+// Reclock new_key_set to CPU clock, debounce and make it one-shot
+always @(posedge clk_i or negedge rst_n_i)
+begin
+    if(rst_n_i == 1'b0) new_key_set_reclocked <= 1'b0;
+    else if (new_key_set_reclocked == 1'b0 && new_key_set_reclocked_delay == 1'b0) 
+    begin
+        new_key_set_reclocked <= new_key_set;
+        new_key_set_reclocked_delay <= 1'b0;
+    end
+    else 
+    begin
+        new_key_set_reclocked_delay <= new_key_set_reclocked;
+        new_key_set_reclocked <= 1'b0;
+    end
+end
+
 // Latch the report pulse and clear on read
 always @(posedge clk_i or negedge rst_n_i)
 begin
@@ -135,7 +153,7 @@ begin
         new_key = 1'b0;
     end
     else if(report == 1'b1) report_reg = 1'b1;
-    else if(new_key_set == 1'b1) new_key <= 1'b1;
+    else if(new_key_set_reclocked_delay == 1'b1) new_key <= 1'b1;
     else if((usb_cs == 1'b1) && (reg_addr_i == 8'h00)) new_key = 1'b0;
     else if((usb_cs == 1'b1) && (reg_addr_i == 8'h08)) report_reg = 1'b0;
 end
