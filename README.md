@@ -25,7 +25,7 @@ In order to set up the external PLL on the Tang Nano 20K for generation of the 2
 * Enter the command: `reboot`
 
 ### Program the FPGA
-If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/download/v0.3.0/nano6502.fs) and program it to the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
+If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/download/v0.3.1/nano6502.fs) and program it to the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
 ```console
 openFPGAloader -b tangnano20k -f ./nano6502.fs
 ```
@@ -48,6 +48,7 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0xfe05:  TX ready UART B - UART is ready to accept a new TX byte  
 0xfe06:  RX data UART B  
 0xfe07:  RX data available UART B - high if a new byte is available in RX data  
+0xfe08:  Baudrate UART B - 0: 4800, 1: 9600, 2: 19200, 3: 38400, 4: 57600, 5: 115200  
    
 ### LED registers 
 0xfe00:  LEDs - byte 0-6 connected to the on board LEDs  
