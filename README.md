@@ -4,7 +4,7 @@ nano6502 is a 6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.co
 Current features:
 * 64 k RAM (currently implemented with block RAM)
 * 8k ROM which can be switched out (also block RAM)
-* UART (on built in USB-C connector for now)
+* UART (on the built in USB-C connector, and the UART header on the carrier board)
 * SD card storage 
 * 80-column text mode HDMI video output, 640x480 60 Hz 
 * USB keyboard support (with [nanoComp](https://github.com/venomix666/nanoComp/) carrier board)  
