@@ -32,12 +32,14 @@ openFPGAloader -b tangnano20k -f ./nano6502.fs
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
-0x00: ROM on IO page.  
+0x00: ROM or RAM on IO page.  
 0x01: UART on IO page.  
 0x02: LED control on IO page.  
 0x03: SD card control on IO page.  
 0x04: Video control IO page.  
 0x05: Timer IO page.  
+
+The boot ROM normally resides at 0xe000 - 0xffff, but can be switched out by writing 0x01 to address 0x0002 in order to have RAM from 0x0000 - 0xfeff. The last page is always assigned to ROM so that the reset vector is correct.
     
 ### UART registers   
 0xfe00:  TX data UART A - write to initiate transmission  
