@@ -9,26 +9,13 @@
 // ROM which can be switched out
 // SDCARD file access
 // UART
-//
-//
-// Future features:
-// SDRAM with bank switching
-// Hires graphics video modes
 // USB keyboard support
-// Audio
 //
 // Copyright (C) 2024 Henrik Löfgren
 
-// Modules
-// CPU - T65
-// Address decoder
-// UART - Stock from board vendor
-// Graphics - Custom, based on board example
-// SDCARD - TBD
-
 // Memory map
 // 0x0000           IO bank L 
-// 0x0001           IO bank H
+// 0x0001           IO bank H (currently not used)
 // 0x0002           ROM in/out (00 = ROM, 01 = RAM)
 // 0xE000-0xFDFF    ROM or RAM
 // 0xFE00-0xFEFF    IO page, controlled by IO bank regs
