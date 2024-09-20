@@ -232,6 +232,10 @@ function [7:0] scancode2char(input [7:0] scancode, input [7:0] modifiers);
             55: a = ".";        // .
             56: a = "/";        // /
             57: ;               // caps lock
+            79: a = 137;        // Right arrow
+            80: a = 136;        // Left arrow
+            81: a = 138;        // Down arrow
+            82: a = 139;        // Up arrow
         endcase
     end if ((modifiers & SHIFT_MASK) && (modifiers & ~SHIFT_MASK) == 0) begin
         // shift down
