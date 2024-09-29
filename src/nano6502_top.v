@@ -30,6 +30,7 @@
 // 0x0004 Video
 // 0x0005 Timer
 // 0x0006 USB HID 1
+// 0x0007 GPIO
 
 module nano6502_top
 (
@@ -50,7 +51,8 @@ module nano6502_top
     inout           sdcmd,
     inout [3:0]     sddat,
     inout           usb_dp,
-    inout           usb_dm
+    inout           usb_dm,
+    inout [12:0]    gpio
 );
 
 reg     [7:0]   cpu_data_i;
@@ -94,6 +96,9 @@ wire    [7:0]   timer_data_o;
 wire            usb_cs;
 wire    [7:0]   usb_data_o;
 
+wire            gpio_cs;
+wire    [7:0]   gpio_data_o;
+
 wire    clk_usb;
 
 wire    WE;
@@ -135,7 +140,8 @@ addr_decoder addr_dec(
         .sd_cs(sd_cs),
         .video_cs(video_cs),
         .timer_cs(timer_cs),
-        .usb_cs(usb_cs)
+        .usb_cs(usb_cs),
+        .gpio_cs(gpio_cs)
 );
 
 /*T65 CPU(
@@ -272,6 +278,17 @@ usb_interface usb_interface_inst(
     .usb_dm(usb_dm)
 );
 
+gpio gpio_inst(
+    .clk_i(clk_i),
+    .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr_w[1:0]),
+    .data_i(cpu_data_o),
+    .gpio_cs(gpio_cs),
+    .data_o(gpio_data_o),
+    .gpio(gpio)
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i = rom_data_o;
     else if(sd_cs == 1'b1) cpu_data_i = sd_data_o;
@@ -282,6 +299,7 @@ always @(*) begin
     else if(video_cs == 1'b1) cpu_data_i = video_data_o;
     else if(timer_cs == 1'b1) cpu_data_i = timer_data_o;
     else if(usb_cs == 1'b1) cpu_data_i = usb_data_o;
+    else if(gpio_cs == 1'b1) cpu_data_i = gpio_data_o;
     else cpu_data_i = cpu_data_o;
 end
 
