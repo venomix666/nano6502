@@ -12,8 +12,8 @@ Current features:
 Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
 
 A port of [CP/M-65](https://github.com/davidgiven/cpm65) is just about the only software that exists for this SoC right now. The on-board USB UART or a USB keyboard can be used for input and it has a fully functional with a SCREEN driver, a SERIAL driver for UART B and 15x1 MB partitions on the SD-card. 
-<img src="https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55" width=400>
-<img src="https://github.com/user-attachments/assets/3e07c907-8239-404c-9a14-ae273194528e" width=400>
+<img src="https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55" width=320>
+<img src="https://github.com/user-attachments/assets/3e07c907-8239-404c-9a14-ae273194528e" width=320>
 
 
 ## Gettings started
