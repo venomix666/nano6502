@@ -58,6 +58,12 @@ reg                     report_reg;
 reg                     new_key_set_reclocked;
 reg                     new_key_set_reclocked_delay;
 
+reg             [22:0]  key1_rpt_cnt;
+reg             [22:0]  key2_rpt_cnt;
+
+localparam      FIRST_REPEAT = 23'd8000000;
+localparam      REPEAT_RATE = 23'd1200000;
+
 // Asynchronous read
 always @(*)
 begin
@@ -97,6 +103,10 @@ begin
         game_btn_reg <= 8'd0;
         game_dir_reg <= 8'd0;
         new_key_set <= 1'd0;
+
+        key1_rpt_cnt <= FIRST_REPEAT;
+        key2_rpt_cnt <= FIRST_REPEAT;
+
     end
     else if(report == 1'b1) 
     begin
@@ -106,10 +116,12 @@ begin
             if (key1 !=0 && key1 != key_active[0] && key1 != key_active[1]) begin
                 keydown <= key1; keyascii <= scancode2char(key1, key_modifiers);
                 new_key_set <= 1'b1;
+                key1_rpt_cnt <= FIRST_REPEAT;
             end
             else if (key2 !=0 && key2 != key_active[0] && key2 != key_active[1]) begin
                 keydown <= key2; keyascii <= scancode2char(key2, key_modifiers);
                 new_key_set <= 1'b1;
+                key2_rpt_cnt <= FIRST_REPEAT;
             end
             else new_key_set <= 1'b0;
             key_active[0] <= key1; key_active[1] <= key2;
@@ -125,7 +137,30 @@ begin
         end
         endcase
     end
-    else new_key_set <= 1'b0;
+    else begin
+        /* Handle auto-repat */
+        if(key_active[0] != 8'd0) begin
+            key1_rpt_cnt <= key1_rpt_cnt - 1;
+            if(key1_rpt_cnt == 23'd0) begin
+                keydown <= key_active[0];
+                keyascii <= scancode2char(key_active[0], key_modifiers);
+                new_key_set <= 1'b1;
+                key1_rpt_cnt <= REPEAT_RATE;
+            end
+            else new_key_set <= 1'b0;
+        end
+        else if(key_active[1] != 8'd0) begin
+            key2_rpt_cnt <= key2_rpt_cnt - 1;
+            if(key2_rpt_cnt == 23'd0) begin
+                keydown <= key_active[1];
+                keyascii <= scancode2char(key_active[1], key_modifiers);
+                new_key_set <= 1'b1;
+                key2_rpt_cnt <= REPEAT_RATE;
+            end
+            else new_key_set <= 1'b0;
+        end
+        else new_key_set <= 1'b0;
+    end
 end
 
 // Reclock new_key_set to CPU clock, debounce and make it one-shot
