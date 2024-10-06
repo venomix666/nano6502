@@ -3,7 +3,7 @@
 // Assuming a base clock of 1.5 MHz as this works well with I2S (usbclock divided by 8)
 
 module adsr(
-    input               clk,
+    input               clk_i,
     input               rst_n,
     input               gate,
     input   [3:0]       attack,

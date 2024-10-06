@@ -1,7 +1,8 @@
 // Oscillator for a simple PSG, very SID inspired
+// Copyright (C) 2024 Henrik Löfgren
 // Assuming a base clock of 1.5 MHz as this works well with I2S (usbclock divided by 8)
 module oscillator(
-    input               clk,
+    input               clk_i,
     input               rst_n,
     input   [15:0]      frequency,
     input               pulse,
@@ -68,10 +69,10 @@ begin
     end
 endmodule
 
-// Noise generator (ADSR)
+// Noise generator (LFSR)
 reg     [15:0]     noise_out;
 
-// ADSR feedback term 0xDA2A
+// LFSR feedback term 0xDA2A
 wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[11]^noise_out[9]^noise_out[5]^noise_out[3]^noise_out[1];
 
 always @(posedge clk_i or negedge rst_n_i)
@@ -84,7 +85,8 @@ begin
     begin
         if(osc_counter == 24'd0) noise_out <= {noise_out[14:0], noise_feedback};
     end
-endmodule
+end
+
 
 // Mixer
 assign sound_o[0] = (sawtooth_out[0] & sawtooth) | (triangle_out[0] & triangle) | (pulse_out & pulse) | (noise_out[0] & noise);
@@ -106,3 +108,5 @@ assign sound_o[12] = (sawtooth_out[12] & sawtooth) | (triangle_out[12] & triangl
 assign sound_o[13] = (sawtooth_out[13] & sawtooth) | (triangle_out[13] & triangle) | (pulse_out & pulse) | (noise_out[13] & noise);
 assign sound_o[14] = (sawtooth_out[14] & sawtooth) | (triangle_out[14] & triangle) | (pulse_out & pulse) | (noise_out[14] & noise);
 assign sound_o[15] = (sawtooth_out[15] & sawtooth) | (triangle_out[15] & triangle) | (pulse_out & pulse) | (noise_out[15] & noise);
+
+endmodule
