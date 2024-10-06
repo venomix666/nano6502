@@ -31,6 +31,7 @@
 // 0x0005 Timer
 // 0x0006 USB HID 1
 // 0x0007 GPIO
+// 0x0008 Sound generator
 
 module nano6502_top
 (
@@ -52,7 +53,11 @@ module nano6502_top
     inout [3:0]     sddat,
     inout           usb_dp,
     inout           usb_dm,
-    inout [12:0]    gpio
+    inout [12:0]    gpio,
+    output          HP_BCK,
+    output          HP_WS,
+    output          HP_DIN,
+    output          PA_EN
 );
 
 reg     [7:0]   cpu_data_i;
@@ -99,6 +104,11 @@ wire    [7:0]   usb_data_o;
 wire            gpio_cs;
 wire    [7:0]   gpio_data_o;
 
+wire            soundgen_cs;
+wire    [7:0]   soundgen_data_o;
+//wire            clk_3m;
+//wire            clk_1m5;
+
 wire    clk_usb;
 
 wire    WE;
@@ -141,38 +151,9 @@ addr_decoder addr_dec(
         .video_cs(video_cs),
         .timer_cs(timer_cs),
         .usb_cs(usb_cs),
-        .gpio_cs(gpio_cs)
+        .gpio_cs(gpio_cs),
+        .soundgen_cs(soundgen_cs)
 );
-
-/*T65 CPU(
-        .Mode(2'b01),       // 65C02
-        .BCD_en(1'b1),      // "others"?
-        .Res_n(rst_n),
-        .Enable(1'b1),
-        .Clk(clk_i),
-        .Rdy(1'b1),
-        .Abort_n(1'b1),
-        .IRQ_n(1'b1),      // Connect later, probably want UART to by interrupt driven
-        .NMI_n(1'b1),
-        .SO_n(1'b1),
-        .R_W_n(R_W_n),
-        .Sync(),
-        .EF(),
-        .MF(),
-        .XF(),
-        .ML_n(),
-        .VP_n(),
-        .VDA(),
-        .VPA(),
-        .A({addr_top, cpu_addr}),
-        .DI(cpu_data_i),
-        .DO(cpu_data_o),
-        .Regs(),
-        .DEBUG(),
-        .NMI_ack()
-);*/
-
-
 
 cpu_65c02 cpuinst(
         .clk(clk_i),
@@ -289,6 +270,36 @@ gpio gpio_inst(
     .gpio(gpio)
 );
 
+// Create 1.5 MHz clock for sound generator
+/*
+   CLKDIV_4 clkdiv_4(
+        .clkout(clk_3m), //output clkout
+        .hclkin(clkusb_i), //input hclkin
+        .resetn(rst_n) //input resetn
+    );
+
+   CLKDIV_2 clkdiv_2(
+        .clkout(clk_1m5), //output clkout
+        .hclkin(clk_3m), //input hclkin
+        .resetn(rst_n) //input resetn
+   );
+*/
+
+soundgen_interface soundgen_inst(
+    .clk_i(clk_i),
+    .clkusb_i(clkusb_i),
+    .rst_n_i(rst_n),
+    .R_W_n(R_W_n),
+    .reg_addr_i(cpu_addr_w[4:0]),
+    .data_i(cpu_data_o),
+    .soundgen_cs(soundgen_cs),
+    .data_o(soundgen_data_o),
+    .HP_BCK(HP_BCK),
+    .HP_WS(HP_WS),
+    .HP_DIN(HP_DIN),
+    .PA_EN(PA_EN)
+);
+
 always @(*) begin
     if(rom_cs == 1'b1) cpu_data_i = rom_data_o;
     else if(sd_cs == 1'b1) cpu_data_i = sd_data_o;
@@ -300,6 +311,7 @@ always @(*) begin
     else if(timer_cs == 1'b1) cpu_data_i = timer_data_o;
     else if(usb_cs == 1'b1) cpu_data_i = usb_data_o;
     else if(gpio_cs == 1'b1) cpu_data_i = gpio_data_o;
+    else if(soundgen_cs == 1'b1) cpu_data_i = soundgen_data_o;
     else cpu_data_i = cpu_data_o;
 end
 
