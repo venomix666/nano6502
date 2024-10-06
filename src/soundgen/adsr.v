@@ -6,10 +6,10 @@ module adsr(
     input               clk_i,
     input               rst_n,
     input               gate,
-    input   [3:0]       attack,
-    input   [3:0]       decay,
-    input   [3:0]       sustain,
-    input   [3:0]       release,
+    input   [3:0]       att,
+    input   [3:0]       dec,
+    input   [3:0]       sus,
+    input   [3:0]       rel,
     input   [15:0]      sound_i,
     output  [15:0]      sound_o      
 );
@@ -38,11 +38,11 @@ reg     [1:0]   state;
 
 wire    [7:0]   sustain_level;
 
-assign  sustain_level = {sustain, sustain};
+assign  sustain_level = {sus, sus};
 
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_i or negedge rst_n)
 begin
-    if(rst_n_i == 1'b0)
+    if(rst_n == 1'b0)
     begin
         envelope <= 8'd0;
         adsr_counter <= 8'd0;
@@ -51,7 +51,7 @@ begin
     end
     else
     begin
-        case state
+        case(state)
         ATTACK_ST: begin
             if(!gate) begin
                 state <= RELEASE_ST;
@@ -62,7 +62,7 @@ begin
                     if(envelope == 8'hff) state <= DECAY_ST;
                     else begin
                         envelope <= envelope + 1;
-                        adsr_counter <= attack_table[attack];
+                        adsr_counter <= attack_table[att];
                     end
                 end
                 else adsr_counter <= adsr_counter - 1;
@@ -78,7 +78,7 @@ begin
                     if(envelope == sustain_level) state <= SUSTAIN_ST;
                     else begin
                         envelope <= envelope - 1;
-                        adsr_counter <= attack_table[decay];
+                        adsr_counter <= attack_table[dec];
                     end
                 end
                 else adsr_counter <= adsr_counter - 1;
@@ -96,7 +96,7 @@ begin
             else begin
                 if(adsr_counter == 16'd0) begin             
                         if(envelope != 0) envelope <= envelope - 1;
-                        adsr_counter <= attack_table[release];
+                        adsr_counter <= attack_table[rel];
                 end
                 else adsr_counter <= adsr_counter - 1;
             end  
@@ -106,5 +106,5 @@ begin
 end
 
 // Audio output
-assign audio_out = 16'(24'(envelope * audio_in)>>8);
+assign sound_o = 16'(24'(envelope * sound_i)>>8);
 endmodule

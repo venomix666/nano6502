@@ -17,9 +17,9 @@ module oscillator(
 reg     [23:0]      osc_counter;
 
 // Main counter
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_i or negedge rst_n)
 begin
-    if(rst_n_i == 1'b0)
+    if(rst_n == 1'b0)
     begin
         osc_counter <= 0;
     end
@@ -27,19 +27,19 @@ begin
     begin
         osc_counter <= osc_counter + frequency; // 440 Hz -> frequency = 4921
     end
-endmodule
+end
 
 
 // Sawtooth oscillator
 reg     [15:0]      sawtooth_out;
-assign sawtoot_out = osc_counter[23:8];
+assign sawtooth_out = osc_counter[23:8];
 
 
 // Triangle wave oscillator
 reg     [15:0]      triangle_out;
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_i or negedge rst_n)
 begin
-    if(rst_n_i == 1'b0)
+    if(rst_n == 1'b0)
     begin
         triangle_out <= 0;
     end
@@ -48,14 +48,14 @@ begin
         if(osc_counter[23] == 1'b0) triangle_out <= osc_counter[22:7];
         else triangle_out <= 16'hffff - osc_counter[22:7];
     end
-endmodule
+end
 
 // Pulse wave oscillator
 reg   pulse_out;
 
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_i or negedge rst_n)
 begin
-    if(rst_n_i == 1'b0)
+    if(rst_n == 1'b0)
     begin
         pulse_out <= 0;
     end
@@ -67,7 +67,7 @@ begin
             else pulse_out <= 0;
         end
     end
-endmodule
+end
 
 // Noise generator (LFSR)
 reg     [15:0]     noise_out;
@@ -75,9 +75,9 @@ reg     [15:0]     noise_out;
 // LFSR feedback term 0xDA2A
 wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[11]^noise_out[9]^noise_out[5]^noise_out[3]^noise_out[1];
 
-always @(posedge clk_i or negedge rst_n_i)
+always @(posedge clk_i or negedge rst_n)
 begin
-    if(rst_n_i == 1'b0)
+    if(rst_n == 1'b0)
     begin
         noise_out <= 16'haaaa;
     end
