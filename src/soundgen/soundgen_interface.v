@@ -142,4 +142,4 @@ begin
     else if(output_req == 1'b1) audio_data <= adsr1_out;
 end
 
-endmodule;
+endmodule

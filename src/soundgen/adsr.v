@@ -19,10 +19,10 @@ reg       [7:0] envelope;
 
 // Cycles between each addition/subtraction to envelope
 // Same constants used for decay and release for now (On the SID they are 3 times slower)
-const bit [15:0] attack_table =  '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
-                                   16'h00DF, 16'h0148, 16'h018E, 16'h01D5,
-                                   16'h024A, 16'h05B9, 16'h0B72, 16'h1250,
-                                   16'h16E3, 16'h44AA, 16'h7271, 16'hB71B};
+const bit [15:0] attack_table[16] =  '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
+                                       16'h00DF, 16'h0148, 16'h018E, 16'h01D5,
+                                       16'h024A, 16'h05B9, 16'h0B72, 16'h1250,
+                                       16'h16E3, 16'h44AA, 16'h7271, 16'hB71B};
 
 
 
@@ -37,6 +37,7 @@ reg     [1:0]   decay_counter;
 reg     [1:0]   state;
 
 wire    [7:0]   sustain_level;
+wire    [23:0]  sound_o_temp;
 
 assign  sustain_level = {sus, sus};
 
@@ -94,7 +95,7 @@ begin
                 adsr_counter <= 16'd0;
             end
             else begin
-                if(adsr_counter == 16'd0) begin             
+                if(adsr_counter == 16'd0) begin
                         if(envelope != 0) envelope <= envelope - 1;
                         adsr_counter <= attack_table[rel];
                 end
@@ -106,5 +107,8 @@ begin
 end
 
 // Audio output
-assign sound_o = 16'(24'(envelope * sound_i)>>8);
+
+assign sound_o_temp = envelope * sound_i;
+assign sound_o = {2'b00, sound_o_temp[23:10]};
+
 endmodule

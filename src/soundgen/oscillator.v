@@ -25,7 +25,7 @@ begin
     end
     else
     begin
-        osc_counter <= osc_counter + frequency; // 440 Hz -> frequency = 4921
+        osc_counter <= osc_counter + frequency; // 440 Hz -> frequency = 4921 = 0x1339
     end
 end
 
