@@ -19,7 +19,8 @@ reg       [7:0] envelope;
 
 // Cycles between each addition/subtraction to envelope
 // Same constants used for decay and release for now (On the SID they are 3 times slower)
-wire [15:0] attack_table[16] =  '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
+wire [15:0] attack_table[16]; 
+assign attack_table =                '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
                                        16'h00DF, 16'h0148, 16'h018E, 16'h01D5,
                                        16'h024A, 16'h05B9, 16'h0B72, 16'h1250,
                                        16'h16E3, 16'h44AA, 16'h7271, 16'hB71B};
