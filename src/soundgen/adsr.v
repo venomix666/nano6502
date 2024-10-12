@@ -114,6 +114,6 @@ begin
     end
 end
 
-assign sound_o = {2'b00, sound_o_next[23:10]};
+assign sound_o = {sound_o_next[23:8]};
 
 endmodule

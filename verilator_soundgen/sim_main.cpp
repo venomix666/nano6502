@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     top->attack_decay3 = 0x00;
     top->sustain_release3 = 0x00;
 
-    top->mixer_volume = 0x10;
+    top->mixer_volume = 0x30;
 
     uint8_t done=0;
     // Simulate until $finish
@@ -118,11 +118,24 @@ int main(int argc, char** argv) {
             // Start a note
             if(contextp->time() == 110) {
                 top->attack_decay1 = 0x88;
-                top->sustain_release1 = 0x28;
-                top->pulse1_msb = 0x03;
+                top->sustain_release1 = 0xF8;
+                top->pulse1_msb = 0x00;
+
+                top->attack_decay2 = 0x33;
+                top->sustain_release2 = 0x91;
+                top->pulse2_msb = 0x03;
+            
+                top->attack_decay3 = 0x11;
+                top->sustain_release3 = 0xB2;
+                top->pulse2_msb = 0x00;
+
+
+                
             }
             if(contextp->time() == 112) {
                 top->ctrl1 = 0x21;
+                top->ctrl2 = 0x41;
+                top->ctrl3 = 0x11;
             }
 
         }
