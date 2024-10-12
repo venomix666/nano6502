@@ -35,6 +35,12 @@ If you don't want to synthesize the project yourself, you can download the [bits
 ```console
 openFPGAloader -b tangnano20k -f ./nano6502.fs
 ```
+
+### Prepare the SD card
+Write the [nano6502.img](https://github.com/venomix666/nano6502/releases/download/v0.4.0/nano6502.img) file into the SD-card using `dd` or your preferred SD-card image writer. If you are updating the image and want to preserve the data on all drives except A, write the [nano6502_sysonly.img](https://github.com/venomix666/nano6502/releases/download/v0.4.0/nano6502_sysonly.img) instead. 
+
+Note: The image supplied with the release here may be outdated, please check the development build on the main [CP/M-65](https://github.com/davidgiven/cpm65) repository if you want the latest version.
+
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
