@@ -24,6 +24,7 @@
         <File path="src/sdcard/sdcmd_ctrl.v" type="file.verilog" enable="1"/>
         <File path="src/soundgen/adsr.v" type="file.verilog" enable="1"/>
         <File path="src/soundgen/audio_drive.v" type="file.verilog" enable="1"/>
+        <File path="src/soundgen/mixer.v" type="file.verilog" enable="1"/>
         <File path="src/soundgen/oscillator.v" type="file.verilog" enable="1"/>
         <File path="src/soundgen/soundgen_interface.v" type="file.verilog" enable="1"/>
         <File path="src/timer.v" type="file.verilog" enable="1"/>

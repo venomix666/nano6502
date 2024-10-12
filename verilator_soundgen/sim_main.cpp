@@ -57,6 +57,7 @@ int main(int argc, char** argv) {
     // Set Vtop's input signals
     top->rst_n_i = 1;
     top->clk_i = 0;
+
     top->freq1_lsb = 0x00;
     top->freq1_msb = 0x18;
     top->pulse1_lsb = 0x00;
@@ -64,6 +65,25 @@ int main(int argc, char** argv) {
     top->ctrl1 = 0x00;
     top->attack_decay1 = 0x00;
     top->sustain_release1 = 0x00;
+
+    top->freq2_lsb = 0x00;
+    top->freq2_msb = 0x23;
+    top->pulse2_lsb = 0x00;
+    top->pulse2_msb = 0x00;
+    top->ctrl2 = 0x00;
+    top->attack_decay2 = 0x00;
+    top->sustain_release2 = 0x00;
+
+    top->freq3_lsb = 0x00;
+    top->freq3_msb = 0x18;
+    top->pulse3_lsb = 0x00;
+    top->pulse3_msb = 0x00;
+    top->ctrl3 = 0x00;
+    top->attack_decay3 = 0x00;
+    top->sustain_release3 = 0x00;
+
+    top->mixer_volume = 0x10;
+
     uint8_t done=0;
     // Simulate until $finish
     while (!contextp->gotFinish()) {
@@ -97,11 +117,12 @@ int main(int argc, char** argv) {
         
             // Start a note
             if(contextp->time() == 110) {
-                top->attack_decay1 = 0x00;
-                top->sustain_release1 = 0x80;
+                top->attack_decay1 = 0x88;
+                top->sustain_release1 = 0x28;
+                top->pulse1_msb = 0x03;
             }
             if(contextp->time() == 112) {
-                top->ctrl1 = 0x11;
+                top->ctrl1 = 0x21;
             }
 
         }

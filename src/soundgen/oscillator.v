@@ -73,8 +73,8 @@ end
 reg     [15:0]     noise_out;
 
 // LFSR feedback term 0xDA2A
-//wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[11]^noise_out[9]^noise_out[5]^noise_out[3]^noise_out[1];
-wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[3]^noise_out[0];
+wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[11]^noise_out[9]^noise_out[5]^noise_out[3]^noise_out[1];
+//wire noise_feedback = noise_out[15]^noise_out[14]^noise_out[12]^noise_out[3]^noise_out[0];
 
 
 always @(posedge clk_i or negedge rst_n)

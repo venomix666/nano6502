@@ -22,7 +22,7 @@ endif
 
 N=top
 D=../src/soundgen
-SRCS=	$D/adsr.v $D/oscillator.v $D/top.v
+SRCS=	$D/adsr.v $D/oscillator.v $D/audio_drive.v $D/mixer.v $D/top.v
 
 # If $VERILATOR_ROOT isn't in the environment, we assume it is part of a
 # package install, and verilator is in your path. Otherwise find the
