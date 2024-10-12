@@ -19,7 +19,7 @@ reg       [7:0] envelope;
 
 // Cycles between each addition/subtraction to envelope
 // Same constants used for decay and release for now (On the SID they are 3 times slower)
-const bit [15:0] attack_table[16] =  '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
+wire [15:0] attack_table[16] =  '{16'h000C, 16'h002F, 16'h005E, 16'h008D,
                                        16'h00DF, 16'h0148, 16'h018E, 16'h01D5,
                                        16'h024A, 16'h05B9, 16'h0B72, 16'h1250,
                                        16'h16E3, 16'h44AA, 16'h7271, 16'hB71B};
@@ -35,9 +35,9 @@ parameter RELEASE_ST   = 3'd3;
 reg     [15:0]  adsr_counter;
 reg     [1:0]   decay_counter;
 reg     [1:0]   state;
+reg     [23:0]  sound_o_next;
 
 wire    [7:0]   sustain_level;
-wire    [23:0]  sound_o_temp;
 
 assign  sustain_level = {sus, sus};
 
@@ -59,14 +59,12 @@ begin
                 adsr_counter <= 16'd0;
             end
             else begin
-                if(adsr_counter == 16'd0) begin
+                if(adsr_counter == attack_table[att]) begin
+                    adsr_counter <= 16'd0;
                     if(envelope == 8'hff) state <= DECAY_ST;
-                    else begin
-                        envelope <= envelope + 1;
-                        adsr_counter <= attack_table[att];
-                    end
+                    else envelope <= envelope + 1;
                 end
-                else adsr_counter <= adsr_counter - 1;
+                else adsr_counter <= adsr_counter + 1;
             end
         end
         DECAY_ST: begin
@@ -75,14 +73,12 @@ begin
                 adsr_counter <= 16'd0;
             end
             else begin
-                if(adsr_counter == 16'd0) begin
-                    if(envelope == sustain_level) state <= SUSTAIN_ST;
-                    else begin
-                        envelope <= envelope - 1;
-                        adsr_counter <= attack_table[dec];
-                    end
+                if(adsr_counter == attack_table[dec]) begin
+                    adsr_counter <= 16'd0;
+                    if(envelope <= sustain_level) state <= SUSTAIN_ST;
+                    else envelope <= envelope - 1;
                 end
-                else adsr_counter <= adsr_counter - 1;
+                else adsr_counter <= adsr_counter + 1;
             end 
         end
         SUSTAIN_ST: begin
@@ -95,11 +91,11 @@ begin
                 adsr_counter <= 16'd0;
             end
             else begin
-                if(adsr_counter == 16'd0) begin
+                if(adsr_counter == attack_table[rel]) begin
                         if(envelope != 0) envelope <= envelope - 1;
-                        adsr_counter <= attack_table[rel];
+                        adsr_counter <= 0;
                 end
-                else adsr_counter <= adsr_counter - 1;
+                else adsr_counter <= adsr_counter + 1;
             end  
         end
         endcase
@@ -107,8 +103,16 @@ begin
 end
 
 // Audio output
+always @(posedge clk_i or negedge rst_n)
+begin
+    if(rst_n == 1'b0) begin
+        sound_o_next <= 16'd0;
+    end
+    else begin
+        sound_o_next <= envelope * sound_i;
+    end
+end
 
-assign sound_o_temp = envelope * sound_i;
-assign sound_o = {2'b00, sound_o_temp[23:10]};
+assign sound_o = {2'b00, sound_o_next[23:10]};
 
 endmodule
