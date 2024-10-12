@@ -8,6 +8,9 @@ Current features:
 * SD card storage 
 * 80-column text mode HDMI video output, 640x480 60 Hz 
 * USB keyboard support (with [nanoComp](https://github.com/venomix666/nanoComp/) carrier board)  
+* Bidirectional GPIO on the header on the nanoComp carrier board
+* Sound through the speaker output from a 3-voice programmable sound generator  
+
 
 Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
 
@@ -115,6 +118,36 @@ The boot ROM normally resides at 0xe000 - 0xffff, but can be switched out by wri
 0xfe08: New USB report available - clears on read  
 0xfe09: Device type - 0: no device, 1: keyboard, 2: mouse, 3: gamepad  
 0xfe0a: USB error code  
+
+### GPIO registers  
+0xfe00: Data register 1 (GPIO 0-7)  
+0xfe01: Data register 2 (GPIO 8-12)  
+0xfe02: Direction register 1 (GPIO 0-8), 0=Input, 1=Output  
+0xfe03: Direction register 2 (GPIO 8-12), 0=Input, 1=Output  
+
+### Sound generator registers
+0xfe00: Frequency Oscillator 1 LSB  
+0xfe01: Frequency Oscillator 1 MSB  
+0xfe02: Pulse wave duty cycle Oscillator 1 LSB  
+0xfe03: Pulse wave duty cycle Oscillator 1 MSB (bits 0-3)  
+0xfe04: Control register OSC1 (B0: Gate, B1: not used B2: not used B3: not used B4: Triange B5: Sawtooth B6: Pulse B7: Noise)  
+0xfe05: Attack/Decay ADSR1 (bits 0-3 decay, bits 4-7: attack)  
+0xfe06: Sustain/Release ADSR1 (bits 0-3 release, bits 4-7: sustain)  
+0xfe07: Frequency Oscillator 2 LSB  
+0xfe08: Frequency Oscillator 2 MSB  
+0xfe09: Pulse wave duty cycle Oscillator 2 LSB  
+0xfe0a: Pulse wave duty cycle Oscillator 2 MSB (bits 0-3)  
+0xfe0b: Control register OSC2 (B0: Gate, B1: not used B2: not used B3: not used B4: Triange B5: Sawtooth B6: Pulse B7: Noise)  
+0xfe0c: Attack/Decay ADSR2 (bits 0-3 decay, bits 4-7: attack)  
+0xfe0d: Sustain/Release ADSR2 (bits 0-3 release, bits 4-7: sustain)  
+0xfe0e: Frequency Oscillator 3 LSB  
+0xfe0f: Frequency Oscillator 3 MSB  
+0xfe10: Pulse wave duty cycle Oscillator 3 LSB  
+0xfe11: Pulse wave duty cycle Oscillator 3 MSB (bits 0-3)  
+0xfe12: Control register OSC3 (B0: Gate, B1: not used B2: not used B3: not used B4: Triange B5: Sawtooth B6: Pulse B7: Noise)  
+0xfe13: Attack/Decay ADSR3 (bits 0-3 decay, bits 4-7: attack)  
+0xfe14: Sustain/Release ADSR3 (bits 0-3 release, bits 4-7: sustain)  
+0xfe15: Master volume  
 
 ### Known bugs
 * Direct writing / reading to the video memory is glitchy due to some timing issue in the FPGA.
