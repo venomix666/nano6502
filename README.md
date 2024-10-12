@@ -50,7 +50,9 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0x03: SD card control on IO page.  
 0x04: Video control IO page.  
 0x05: Timer IO page.  
-0x06: USB HID page.
+0x06: USB HID page.  
+0x07: GPIO page.  
+0x08: Sound generator page.  
 
 The boot ROM normally resides at 0xe000 - 0xffff, but can be switched out by writing 0x01 to address 0x0002 in order to have RAM from 0x0000 - 0xfeff. The last page is always assigned to ROM so that the reset vector is correct.
     
