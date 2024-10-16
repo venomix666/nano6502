@@ -19,7 +19,8 @@ export LIBS = \
 	./lib/screen.a \
 	./lib/serial.a \
 	./lib/xfcb.a \
-	./lib/nano6502_timer.a
+	./lib/nano6502_timer.a \
+	./lib/nano6502_sound.a
 
 .PHONY: all
 all: $(LIBS) ledtest.com hello.com baudrate.com colorfg.com colorbg.com \
