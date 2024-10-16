@@ -14,7 +14,7 @@ Current features:
 
 Everything is clocked of the pixel clock, so the 65C02 core is running at 25.175 MHz which gives a rather speedy user experience.
 
-A port of [CP/M-65](https://github.com/davidgiven/cpm65) is just about the only software that exists for this SoC right now. The on-board USB UART or a USB keyboard can be used for input and it has a fully functional with a SCREEN driver, a SERIAL driver for UART B and 15x1 MB partitions on the SD-card.  
+A port of [CP/M-65](https://github.com/davidgiven/cpm65) is just about the only software that exists for this SoC right now, apart from the boot ROM and monitor. The on-board USB UART or a USB keyboard can be used for input and it has a SCREEN driver, a SERIAL driver for UART B and 15x1 MB partitions on the SD-card.  
   
 <img src="https://github.com/venomix666/nano6502/assets/106430829/0e64418e-a7e4-47c8-bef7-8a85b2532d55" width=400>
 <img src="https://github.com/user-attachments/assets/3e07c907-8239-404c-9a14-ae273194528e" width=400>
@@ -31,10 +31,16 @@ In order to set up the external PLL on the Tang Nano 20K for generation of the 2
 * Enter the command: `reboot`
 
 ### Program the FPGA
-If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/download/v0.3.4/nano6502.fs) and program it to the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
+If you don't want to synthesize the project yourself, you can download the [bitstream file](https://github.com/venomix666/nano6502/releases/latest/download/nano6502.fs) and program it to the FPGA configuration flash memory using [openFPGAloader](https://github.com/trabucayre/openFPGALoader):  
 ```console
 openFPGAloader -b tangnano20k -f ./nano6502.fs
 ```
+
+### Prepare the SD card
+Write the [nano6502.img](https://github.com/venomix666/nano6502/releases/latest/download/nano6502.img) file into the SD-card using `dd` or your preferred SD-card image writer. If you are updating the image and want to preserve the data on all drives except A, write the [nano6502_sysonly.img](https://github.com/venomix666/nano6502/releases/latest/download/nano6502_sysonly.img) instead. 
+
+Note: The image supplied with the release here may be outdated, please check the development build on the main [CP/M-65](https://github.com/davidgiven/cpm65) repository if you want the latest version.
+
 ## Peripherals and IO model
 In order to maximize the amount of available RAM, a simple banked IO model is used.   
 The IO select register (address 0x0000) performs banking of the IO page (0xfe00-0xfeff) and can be set to the following values:  
@@ -44,7 +50,9 @@ The IO select register (address 0x0000) performs banking of the IO page (0xfe00-
 0x03: SD card control on IO page.  
 0x04: Video control IO page.  
 0x05: Timer IO page.  
-0x06: USB HID page.
+0x06: USB HID page.  
+0x07: GPIO page.  
+0x08: Sound generator page.  
 
 The boot ROM normally resides at 0xe000 - 0xffff, but can be switched out by writing 0x01 to address 0x0002 in order to have RAM from 0x0000 - 0xfeff. The last page is always assigned to ROM so that the reset vector is correct.
     
