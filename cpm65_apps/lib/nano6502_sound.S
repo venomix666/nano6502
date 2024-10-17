@@ -22,7 +22,7 @@ zproc _snd_set_adsr1_ad, .text.snd_set_adsr1_ad
     rts
 zendproc
 
-zproc _snd_set_adsr1_sd, .text.snd_set_adsr1_ad
+zproc _snd_set_adsr1_sr, .text.snd_set_adsr1_sr
     sta snd_adsr1_sr
     rts
 zendproc
@@ -49,7 +49,7 @@ zproc _snd_set_adsr2_ad, .text.snd_set_adsr2_ad
     rts
 zendproc
 
-zproc _snd_set_adsr2_sd, .text.snd_set_adsr2_ad
+zproc _snd_set_adsr2_sr, .text.snd_set_adsr2_sr
     sta snd_adsr2_sr
     rts
 zendproc
@@ -76,7 +76,7 @@ zproc _snd_set_adsr3_ad, .text.snd_set_adsr3_ad
     rts
 zendproc
 
-zproc _snd_set_adsr3_sd, .text.snd_set_adsr3_ad
+zproc _snd_set_adsr3_sr, .text.snd_set_adsr3_sr
     sta snd_adsr3_sr
     rts
 zendproc

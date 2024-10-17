@@ -26,46 +26,40 @@ extern void _snd_set_osc3_ctrl(uint8_t ctrl);
 
 extern void snd_set_master_vol (uint8_t vol);
 
-#define snd_set_adsr1(uint8_t attack, uint8_t decay, \
-                      uint8_t sustain, uint8_t release) \
+#define snd_set_adsr1(a, d, s, r) \
         do { \
                 _snd_set_adsr1_ad((a<<4) | (d & 0x0f)); \
                 _snd_set_adsr1_sr((s<<4) | (d & 0x0f)); \
         } while(0)
 
-#define snd_set_osc1_ctrl(uint8_t gate, uint8_t triangle, uint8_t sawtooth, \
-                          uint8_t pulse, uint8_t noise) \
+#define snd_set_osc1_ctrl(gate, triangle, sawtooth, pulse, noise) \
         do { \
                 _snd_set_osc1_ctrl((noise<<7 ) | (pulse<<6) | (sawtooth<<5) | \
-                                   (trangle<<4) | gate); \
+                                   (triangle<<4) | gate); \
         } while (0)
 
-#define snd_set_adsr2(uint8_t attack, uint8_t decay, \
-                      uint8_t sustain, uint8_t release) \
+#define snd_set_adsr2(a, d, s, r) \
         do { \
                 _snd_set_adsr2_ad((a<<4) | (d & 0x0f)); \
                 _snd_set_adsr2_sr((s<<4) | (d & 0x0f)); \
         } while(0)
 
-#define snd_set_osc2_ctrl(uint8_t gate, uint8_t triangle, uint8_t sawtooth, \
-                          uint8_t pulse, uint8_t noise) \
+#define snd_set_osc2_ctrl(gate, triangle, sawtooth, pulse, noise) \
         do { \
                 _snd_set_osc2_ctrl((noise<<7 ) | (pulse<<6) | (sawtooth<<5) | \
-                                   (trangle<<4) | gate); \
+                                   (triangle<<4) | gate); \
         } while (0)
 
-#define snd_set_adsr3(uint8_t attack, uint8_t decay, \
-                      uint8_t sustain, uint8_t release) \
+#define snd_set_adsr3(a, d, s, r) \
         do { \
                 _snd_set_adsr3_ad((a<<4) | (d & 0x0f)); \
                 _snd_set_adsr3_sr((s<<4) | (d & 0x0f)); \
         } while(0)
 
-#define snd_set_osc3_ctrl(uint8_t gate, uint8_t triangle, uint8_t sawtooth, \
-                          uint8_t pulse, uint8_t noise) \
+#define snd_set_osc3_ctrl(gate, triangle, sawtooth, pulse, noise) \
         do { \
                 _snd_set_osc3_ctrl((noise<<7 ) | (pulse<<6) | (sawtooth<<5) | \
-                                   (trangle<<4) | gate); \
+                                   (triangle<<4) | gate); \
         } while (0)
 
 #endif
