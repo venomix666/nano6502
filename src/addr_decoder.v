@@ -65,236 +65,64 @@ end
 
 // Address decoding, combinatorial mux
 always @(*) begin
+    // Default values - nothing selected
+    data_o_reg = 8'd0;
+    ram_cs_reg = 1'b0;
+    rom_cs_reg = 1'b0;
+    uart_cs_reg = 1'b0;
+    led_cs_reg = 1'b0;
+    sd_cs_reg = 1'b0;
+    video_cs_reg = 1'b0;
+    timer_cs_reg = 1'b0;
+    usb_cs_reg = 1'b0;
+    gpio_cs_reg = 1'b0;
+    soundgen_cs_reg = 1'b0;
+    addr_dec_cs_reg = 1'b0;
+    
+    // IO bank low
     if(addr_w_i == 16'h0000) 
     begin
         data_o_reg = io_bank_l;
-        ram_cs_reg = 1'b0;
-        uart_cs_reg = 1'b0;
-        rom_cs_reg = 1'b0;
-        led_cs_reg = 1'b0;
-        sd_cs_reg = 1'b0;
-        video_cs_reg = 1'b0;
-        timer_cs_reg = 1'b0;
-        usb_cs_reg = 1'b0;
-        gpio_cs_reg = 1'b0;
-        soundgen_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
+    // IO bank high
     else if(addr_w_i == 16'h0001) 
     begin    
         data_o_reg = io_bank_h;
-        ram_cs_reg = 1'b0;
-        uart_cs_reg = 1'b0;
-        rom_cs_reg = 1'b0;
-        led_cs_reg = 1'b0;
-        sd_cs_reg = 1'b0;
-        video_cs_reg = 1'b0;
-        timer_cs_reg = 1'b0;
-        usb_cs_reg = 1'b0;
-        gpio_cs_reg = 1'b0;
-        soundgen_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
+    // ROM select
     else if(addr_w_i == 16'h0002)
     begin
         data_o_reg = rom_sel;
-        ram_cs_reg = 1'b0;
-        uart_cs_reg = 1'b0;
-        rom_cs_reg = 1'b0;
-        led_cs_reg = 1'b0;
-        sd_cs_reg = 1'b0;
-        video_cs_reg = 1'b0;
-        timer_cs_reg = 1'b0;
-        usb_cs_reg = 1'b0;
-        gpio_cs_reg = 1'b0;
-        soundgen_cs_reg = 1'b0;
         addr_dec_cs_reg = 1'b1;
     end
+    // IO space
     else if((addr_w_i >= 16'hfe00) && (addr_w_i < 16'hff00))
     begin
         case(io_bank_l)
-            8'h00:
-            begin
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b1;
-                led_cs_reg = 1'b0;
-                data_o_reg = 8'd0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h01:
-            begin
-                uart_cs_reg = 1'b1;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                data_o_reg = 8'd0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h02:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b1;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h03:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b1;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h04:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b1;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h05:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b1;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h06:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b1;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h07:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b1;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
-            8'h08:
-            begin
-                data_o_reg = 8'd0;
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b0;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b1;
-                addr_dec_cs_reg = 1'b0;
-            end
-            default:
-            begin
-                uart_cs_reg = 1'b0;
-                ram_cs_reg = 1'b1;
-                rom_cs_reg = 1'b0;
-                led_cs_reg = 1'b0;
-                data_o_reg = 8'd0;
-                sd_cs_reg = 1'b0;
-                video_cs_reg = 1'b0;
-                timer_cs_reg = 1'b0;
-                usb_cs_reg = 1'b0;
-                gpio_cs_reg = 1'b0;
-                soundgen_cs_reg = 1'b0;
-                addr_dec_cs_reg = 1'b0;
-            end
+            8'h00: rom_cs_reg = 1'b1;       // ROM
+            8'h01: uart_cs_reg = 1'b1;      // UART
+            8'h02: led_cs_reg = 1'b1;       // LEDs
+            8'h03: sd_cs_reg = 1'b1;        // SD-card
+            8'h04: video_cs_reg = 1'b1;     // Video
+            8'h05: timer_cs_reg = 1'b1;     // Timer
+            8'h06: usb_cs_reg = 1'b1;       // USB
+            8'h07: gpio_cs_reg = 1'b1;      // GPIO
+            8'h08: soundgen_cs_reg = 1'b1;  // Sound
+            default: ram_cs_reg = 1'b1;     // RAM
         endcase
         
     end
+    // Enable ROM
     else if((addr_w_i >= 16'he000) && (addr_w_i < 16'hffff) && (rom_sel == 8'd0))
     begin
-        uart_cs_reg = 1'b0;
-        ram_cs_reg = 1'b0;
         rom_cs_reg = 1'b1;
-        data_o_reg = 8'd0;
-        led_cs_reg = 1'b0;
-        sd_cs_reg = 1'b0;
-        video_cs_reg = 1'b0;
-        timer_cs_reg = 1'b0;
-        usb_cs_reg = 1'b0;
-        gpio_cs_reg = 1'b0;
-        soundgen_cs_reg = 1'b0;
-        addr_dec_cs_reg = 1'b0;
     end
+    // Switch out ROM for RAM
     else
     begin
-        data_o_reg = 8'd0;
         ram_cs_reg = 1'b1;
-        rom_cs_reg = 1'b0;
-        uart_cs_reg = 1'b0;
-        led_cs_reg = 1'b0;
-        sd_cs_reg = 1'b0;
-        video_cs_reg = 1'b0;
-        timer_cs_reg = 1'b0;
-        usb_cs_reg = 1'b0;
-        gpio_cs_reg = 1'b0;
-        soundgen_cs_reg = 1'b0;
-        addr_dec_cs_reg = 1'b0;
     end
 end
 
