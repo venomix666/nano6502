@@ -1,6 +1,6 @@
 # nano6502
 nano6502 is a 6502 SoC for the [Tang Nano 20k FPGA Board](https://wiki.sipeed.com/hardware/en/tang/tang-nano-20k/nano-20k.html).  
-(If you prefer the Z80 to the 6502, I am also working on a [Z80 version](https://github.com/venomix666/nano-z80))
+(If you prefer the Z80 to the 6502, there is also a [Z80 version](https://github.com/venomix666/nano-z80) which can run all your favourite CP/M software)
 
 Current features:
 * 64 k RAM (currently implemented with block RAM)
