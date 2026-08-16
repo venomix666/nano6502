@@ -52,9 +52,11 @@ wire [7:0] buf_data_o;
 reg outen_dly;
 
 // Delay storing read data from the SD card with one clock cycle
-// Seems to improve stability between buildss
+// Seems to improve stability between builds
 always @(posedge clk_i)
+begin
     outen_dly <= outen;
+end
 
 always @(posedge clk_i)
     data_i_delay <= data_i;
@@ -64,7 +66,7 @@ sector_dpram buffer(
     .reseta(1'b0), 
     .cea(1'b1), 					
     .ada(outaddr), 
-    .wrea(outen_dly), 
+    .wrea(outen), 
     .dina(sd_data_o),
     .ocea(1'b1), 
     .douta(sd_data_i),
